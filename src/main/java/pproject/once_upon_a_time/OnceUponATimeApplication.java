@@ -1,4 +1,4 @@
-package gachon.pproject.yenyet.once_upon_a_time;
+package pproject.once_upon_a_time;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
