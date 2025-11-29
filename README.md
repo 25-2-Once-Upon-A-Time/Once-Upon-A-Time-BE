@@ -5,19 +5,35 @@
 ## 📁 폴더 구조 (도메인형 DDD 기반)
 
 ```
-📂 backend
-├── 📂 Member
-│   ├── 📂 controller     
-│   ├── 📂 service       
-│   ├── 📂 repository     
-│   ├── 📂 domain         
-│   └── 📂 dto            
+📂 once_upon_a_time
+├── 📂 domain
+│   ├── 📂 member
+│   │   ├── 📂 controller
+│   │   ├── 📂 service
+│   │   ├── 📂 repository
+│   │   ├── 📂 domain
+│   │   └── 📂 dto
+│   │
+│   ├── 📂 book
+│   │   ├── 📂 controller
+│   │   ├── 📂 service
+│   │   ├── 📂 repository
+│   │   ├── 📂 domain
+│   │   └── 📂 dto
+│   │
+│   └── 📂 (추가 도메인들)
 │
-├── 📂 Book
-├── 📂 Auth
-├── 📂 Common             # 공통 로직 (예외, 응답 Wrapper 등)
-└── 📂 Config             # 설정 파일
-
+├── 📂 auth
+│   ├── 📂 config          # SecurityConfig 등
+│   ├── 📂 jwt             # JwtProvider, JwtUtil 등
+│   ├── 📂 filter          # JwtFilter, AuthFilter 등
+│   └── 📂 userdetails     # CustomUserDetails, UserDetailsService 등
+│
+├── 📂 global
+│   ├── 📂 common          # 공통 응답(Response), Util
+│   └── 📂 exception       # 전역 예외 처리
+│
+└── 📂 config              # Swagger, JPA, Redis 등 전역 설정
 ```
 
 ---

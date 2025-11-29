@@ -1,3 +1,67 @@
-/gradlew text eol=lf
+###############################################
+# 기본 텍스트 처리
+###############################################
+# 모든 텍스트 파일은 자동으로 줄바꿈 관리
+* text=auto
+
+###############################################
+# Gradle Wrapper
+###############################################
+# macOS/Linux용 gradlew: LF 필요
+gradlew text eol=lf
+
+# Windows용 gradlew.bat: CRLF 필요
+gradlew.bat text eol=crlf
+
+###############################################
+# Shell scripts (macOS/Linux)
+###############################################
+*.sh text eol=lf
+
+###############################################
+# Windows 배치파일
+###############################################
 *.bat text eol=crlf
+*.cmd text eol=crlf
+
+###############################################
+# 코드/설정 파일(LF 강제)
+###############################################
+*.json text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.xml  text eol=lf
+*.md   text eol=lf
+*.java text eol=lf
+*.js   text eol=lf
+*.ts   text eol=lf
+*.jsx  text eol=lf
+*.tsx  text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+
+###############################################
+# SQL / Properties도 LF 권장
+###############################################
+*.sql text eol=lf
+*.properties text eol=lf
+
+###############################################
+# Binary files (절대 변환 금지)
+###############################################
 *.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.exe binary
+*.dll binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
