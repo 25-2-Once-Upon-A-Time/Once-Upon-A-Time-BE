@@ -4,20 +4,37 @@
 
 ## 📁 폴더 구조 (도메인형 DDD 기반)
 
-```
-📂 backend
-├── 📂 Member
-│   ├── 📂 controller     
-│   ├── 📂 service       
-│   ├── 📂 repository     
-│   ├── 📂 domain         
-│   └── 📂 dto            
-│
-├── 📂 Book
-├── 📂 Auth
-├── 📂 Common             # 공통 로직 (예외, 응답 Wrapper 등)
-└── 📂 Config             # 설정 파일
 
+```
+📂 once_upon_a_time
+├── 📂 domain
+│   ├── 📂 member
+│   │   ├── 📂 controller
+│   │   ├── 📂 service
+│   │   ├── 📂 repository
+│   │   ├── 📂 domain
+│   │   └── 📂 dto
+│   │
+│   ├── 📂 book
+│   │   ├── 📂 controller
+│   │   ├── 📂 service
+│   │   ├── 📂 repository
+│   │   ├── 📂 domain
+│   │   └── 📂 dto
+│   │
+│   └── 📂 (추가 도메인들)
+│
+├── 📂 auth
+│   ├── 📂 config          # SecurityConfig 등
+│   ├── 📂 jwt             # JwtProvider, JwtUtil 등
+│   ├── 📂 filter          # JwtFilter, AuthFilter 등
+│   └── 📂 userdetails     # CustomUserDetails, UserDetailsService 등
+│
+├── 📂 global
+│   ├── 📂 common          # 공통 응답(Response), Util
+│   └── 📂 exception       # 전역 예외 처리
+│
+└── 📂 config              # Swagger, JPA, Redis 등 전역 설정
 ```
 
 ---
@@ -25,17 +42,17 @@
 ## 🔖 브랜치 전략 (GitHub Flow 기반)
 
 - `main`: 제품 출시 브랜치 (배포 대상)
-- `dev`: 통합 개발 브랜치 
-- `feat/feature-name`: 기능 개발용 브랜치
-- `fix/bug-name`: 버그 수정 브랜치
-- `hotfix/critical-name`: 긴급 수정 브랜치
+- `develop`: 통합 개발 브랜치 
+- `feat/#issue-number`: 기능 개발용 브랜치
+- `fix/#issue-number`: 버그 수정 브랜치
+- `.../#issue-number`: 긴급 수정 브랜치
 
 ---
 
 ## 💬 PR 규칙
 
-- 제목 형식: `[Feat] 로그인 API 구현`
-- 템플릿 기반 작성 (유형 / 작업 내용 / 리뷰 포인트 등)
+- 제목 형식: `feat: 로그인 API 구현`
+- 템플릿 기반 작성 (유형 / 설명 / 스크린샷 등)
 
 ---
 
