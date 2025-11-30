@@ -4,6 +4,7 @@
 
 ## 📁 폴더 구조 (도메인형 DDD 기반)
 
+
 ```
 📂 once_upon_a_time
 ├── 📂 domain
@@ -41,17 +42,17 @@
 ## 🔖 브랜치 전략 (GitHub Flow 기반)
 
 - `main`: 제품 출시 브랜치 (배포 대상)
-- `dev`: 통합 개발 브랜치 
-- `feat/feature-name`: 기능 개발용 브랜치
-- `fix/bug-name`: 버그 수정 브랜치
-- `hotfix/critical-name`: 긴급 수정 브랜치
+- `develop`: 통합 개발 브랜치 
+- `feat/#issue-number`: 기능 개발용 브랜치
+- `fix/#issue-number`: 버그 수정 브랜치
+- `.../#issue-number`: 긴급 수정 브랜치
 
 ---
 
 ## 💬 PR 규칙
 
-- 제목 형식: `[Feat] 로그인 API 구현`
-- 템플릿 기반 작성 (유형 / 작업 내용 / 리뷰 포인트 등)
+- 제목 형식: `feat: 로그인 API 구현`
+- 템플릿 기반 작성 (유형 / 설명 / 스크린샷 등)
 
 ---
 
