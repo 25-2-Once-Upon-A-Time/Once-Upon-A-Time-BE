@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\Dev\\Sommteum\\backend\\src\\main\\java\\com\\comma\\soomteum\\global\\response/**)",
+      "Read(C:\\Dev\\Sommteum\\backend\\src\\main\\java\\com\\comma\\soomteum\\global\\response/**)",
+      "Read(C:\\Dev\\Sommteum\\backend\\src\\main\\java\\com\\comma\\soomteum\\global\\response/**)",
+      "Read(C:\\Dev\\Sommteum\\backend\\src\\main\\java\\com\\comma\\soomteum\\global\\response/**)",
+      "Read(C:\\Dev\\Sommteum\\backend\\src\\main\\java\\com\\comma\\soomteum\\global\\response/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
