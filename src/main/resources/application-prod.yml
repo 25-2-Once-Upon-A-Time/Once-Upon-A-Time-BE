@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/db25308
+    username: dbid253
+    password: dbpass253
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate    # 운영에서는 update 안 씀 (DB 보호)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format_sql: false
+    show-sql: false
+
+server:
+  port: 60008   # 학과 서버 포트
+
+jwt:
+  token:
+    secret: "prod-secure-secret-key-change-me"
