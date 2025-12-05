@@ -5,22 +5,22 @@ import io.micrometer.common.lang.Nullable;
 import org.springframework.http.HttpStatus;
 import pproject.once_upon_a_time.global.exception.CustomException;
 
-public record ApiResponse<T>(
+public record ApiResult<T>(
         @JsonIgnore HttpStatus httpStatus,
         boolean success,
         @Nullable T data,
         @Nullable ExceptionDto error
 ) {
-    public static <T> ApiResponse<T> ok(@Nullable final T data) {
-        return new ApiResponse<>(HttpStatus.OK, true, data, null);
+    public static <T> ApiResult<T> ok(@Nullable final T data) {
+        return new ApiResult<>(HttpStatus.OK, true, data, null);
     }
 
-    public static <T> ApiResponse<T> created(@Nullable final T data) {
-        return new ApiResponse<>(HttpStatus.CREATED, true, data, null);
+    public static <T> ApiResult<T> created(@Nullable final T data) {
+        return new ApiResult<>(HttpStatus.CREATED, true, data, null);
     }
 
-    public static <T> ApiResponse<T> fail(final CustomException e, final String path) {
-        return new ApiResponse<>(
+    public static <T> ApiResult<T> fail(final CustomException e, final String path) {
+        return new ApiResult<>(
                 e.getErrorCode().getHttpStatus(),
                 false,
                 null,
