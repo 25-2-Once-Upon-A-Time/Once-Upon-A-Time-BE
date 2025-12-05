@@ -18,19 +18,4 @@ spring:
         format_sql: true
     show-sql: true
 
-  servlet:
-    multipart:
-      max-file-size: 25MB
-      max-request-size: 25MB
 
-server:
-  port: 8080
-
-supabase:
-  url: ${SUPABASE_URL}
-  service-key: ${SUPABASE_SERVICE_KEY}
-
-  buckets:
-    image: ${SUPABASE_IMAGE_BUCKET}
-    audio: ${SUPABASE_AUDIO_BUCKET}
-    character: ${SUPABASE_CHARACTER_BUCKET}

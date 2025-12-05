@@ -34,7 +34,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 
 	// === DB Drivers ===
-	runtimeOnly 'com.mysql:mysql-connector-j:8.0.33'   // prod MariaDB용
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
 	runtimeOnly 'com.h2database:h2'                     // dev(H2) 실행용
 	testImplementation 'com.h2database:h2'              // test 환경에서도 H2
 

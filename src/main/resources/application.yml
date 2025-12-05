@@ -1,3 +1,20 @@
 spring:
   profiles:
     active: dev
+
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+server:
+  port: ${SERVER_PORT}
+
+supabase:
+  url: ${SUPABASE_URL}
+  service-key: ${SUPABASE_SERVICE_KEY}
+
+  buckets:
+    image: ${SUPABASE_IMAGE_BUCKET}
+    audio: ${SUPABASE_AUDIO_BUCKET}
+    character: ${SUPABASE_CHARACTER_BUCKET}
