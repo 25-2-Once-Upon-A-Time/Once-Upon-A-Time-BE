@@ -12,10 +12,10 @@ import pproject.once_upon_a_time.global.response.ApiResponse;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e, HttpServletRequest request) {
-        ApiResponse<Void> response = ApiResponse.fail(e, request.getRequestURI());
+    public ResponseEntity<ApiResponse<?>> handleCustomException(CustomException e) {
+        ApiResponse<?> response = ApiResponse.fail(e);
         return ResponseEntity
-                .status(response.httpStatus())
+                .status(e.getErrorCode().getHttpStatus())
                 .body(response);
     }
 

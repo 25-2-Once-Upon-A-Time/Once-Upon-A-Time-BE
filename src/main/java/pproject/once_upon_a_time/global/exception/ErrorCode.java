@@ -50,6 +50,7 @@ public enum ErrorCode {
     NOT_FOUND_END_POINT(404_000, HttpStatus.NOT_FOUND, "요청한 대상이 존재하지 않습니다."),
     USER_NOT_FOUND(404_001, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     USER_NOT_FOUND_IN_COOKIE(404_002, HttpStatus.NOT_FOUND, "쿠키에서 사용자 정보를 찾을 수 없습니다."),
+    MEMBER_NOT_FOUND(404_003, HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
 
 
     // ========================
@@ -63,6 +64,8 @@ public enum ErrorCode {
     // 500 Internal Server Error
     // ========================
     INTERNAL_SERVER_ERROR(500_000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    KAKAO_TOKEN_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 토큰을 가져오는 중 오류가 발생했습니다."),
+    KAKAO_USER_INFO_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 사용자 정보를 가져오는 중 오류가 발생했습니다."),
 
     ;
 

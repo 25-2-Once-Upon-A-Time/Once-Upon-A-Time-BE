@@ -1,30 +1,35 @@
 package pproject.once_upon_a_time.global.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.micrometer.common.lang.Nullable;
-import org.springframework.http.HttpStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
 import pproject.once_upon_a_time.global.exception.CustomException;
 
-public record ApiResponse<T>(
-        @JsonIgnore HttpStatus httpStatus,
-        boolean success,
-        @Nullable T data,
-        @Nullable ExceptionDto error
-) {
-    public static <T> ApiResponse<T> ok(@Nullable final T data) {
-        return new ApiResponse<>(HttpStatus.OK, true, data, null);
+@Getter
+@JsonInclude(JsonInclude.Include.NON_NULL) // Null 값인 필드는 JSON 응답에 포함하지 않음
+public class ApiResponse<T> {
+
+    private final String code;
+    private final String message;
+    private T data;
+
+    // 성공 시
+    private ApiResponse(String code, String message, T data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
     }
 
-    public static <T> ApiResponse<T> created(@Nullable final T data) {
-        return new ApiResponse<>(HttpStatus.CREATED, true, data, null);
+    // 실패 시
+    private ApiResponse(String code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
-    public static <T> ApiResponse<T> fail(final CustomException e, final String path) {
-        return new ApiResponse<>(
-                e.getErrorCode().getHttpStatus(),
-                false,
-                null,
-                ExceptionDto.of(e.getErrorCode(), path, e.getMessage())
-        );
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>("SUCCESS", message, data);
+    }
+    
+    public static ApiResponse<?> fail(CustomException e) {
+        return new ApiResponse<>(e.getErrorCode().name(), e.getMessage());
     }
 }
