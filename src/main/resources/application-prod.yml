@@ -19,7 +19,7 @@ spring:
     show-sql: false
 
 server:
-  port: ${SERVER_PORT:60003}
+  port: ${SERVER_PORT}
 
 supabase:
   url: ${SUPABASE_URL}
@@ -28,3 +28,4 @@ supabase:
   buckets:
     image: ${SUPABASE_IMAGE_BUCKET}
     audio: ${SUPABASE_AUDIO_BUCKET}
+    character: ${SUPABASE_CHARACTER_BUCKET}

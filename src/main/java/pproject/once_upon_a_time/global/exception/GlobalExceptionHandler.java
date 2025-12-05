@@ -6,14 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pproject.once_upon_a_time.global.response.ApiResponse;
+import pproject.once_upon_a_time.global.response.ApiResult;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e, HttpServletRequest request) {
-        ApiResponse<Void> response = ApiResponse.fail(e, request.getRequestURI());
+    public ResponseEntity<ApiResult<Void>> handleCustomException(CustomException e, HttpServletRequest request) {
+        ApiResult<Void> response = ApiResult.fail(e, request.getRequestURI());
         return ResponseEntity
                 .status(response.httpStatus())
                 .body(response);

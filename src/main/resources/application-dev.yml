@@ -28,3 +28,4 @@ supabase:
   buckets:
     image: ${SUPABASE_IMAGE_BUCKET}
     audio: ${SUPABASE_AUDIO_BUCKET}
+    character: ${SUPABASE_CHARACTER_BUCKET}
