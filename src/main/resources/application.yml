@@ -1,3 +1,30 @@
 spring:
   profiles:
-    active: dev
+    active: dev # 기본 프로필
+    group:
+      dev:
+        - common
+        - dev
+      prod:
+        - common
+        - prod
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: common
+
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
