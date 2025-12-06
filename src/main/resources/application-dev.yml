@@ -18,4 +18,10 @@ spring:
         format_sql: true
     show-sql: true
 
+server:
+  port: 8080
 
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
