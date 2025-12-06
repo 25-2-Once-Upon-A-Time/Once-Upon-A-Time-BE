@@ -37,6 +37,9 @@ public class Story {
     @Column(name = "tags", length = 200)
     private String tags; // 태그
 
+    @Column(name = "thumbnail_url", length = 500)
+    private String thumbnailUrl; // 썸네일 이미지 URL
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt; // 생성 요청 시각

@@ -1,37 +1,43 @@
 package pproject.once_upon_a_time.config;
 
-
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.OpenApiCustomizer;
-import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pproject.once_upon_a_time.global.response.ExceptionDto;
 
 @Configuration
+@SecurityScheme(
+        name = "JWT TOKEN",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER
+)
 public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
         Info info = new Info()
-                .title("옛날옛적에")
-                .description("개발 중인 백엔드 API 명세입니다.")
+                .title("Once Upon A Time API")
+                .description("개발 중인 백엔드 REST API 명세")
                 .version("v1.0.0");
 
         String jwtSchemeName = "JWT TOKEN";
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
         Components components = new Components()
-                .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
+                .addSecuritySchemes(jwtSchemeName, new io.swagger.v3.oas.models.security.SecurityScheme()
                         .name(jwtSchemeName)
-                        .type(SecurityScheme.Type.HTTP)
+                        .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT"));
 
@@ -62,33 +68,13 @@ public class SwaggerConfig {
                     pathItem.readOperations().forEach(op -> {
                         op.getResponses()
                                 .addApiResponse("400", new io.swagger.v3.oas.models.responses.ApiResponse()
-                                        .description("요청 파라미터 오류").content(errorContent))
+                                        .description("잘못된 파라미터 오류").content(errorContent))
                                 .addApiResponse("502", new io.swagger.v3.oas.models.responses.ApiResponse()
-                                        .description("외부 관광 API 오류").content(errorContent))
+                                        .description("외부 연동 API 오류").content(errorContent))
                                 .addApiResponse("500", new io.swagger.v3.oas.models.responses.ApiResponse()
                                         .description("서버 오류").content(errorContent));
                     })
             );
         };
     }
-
-
-    // Auth(카카오) 그룹
-    @Bean
-    GroupedOpenApi authGroup(@Qualifier("commonErrorResponses") OpenApiCustomizer commonErrorResponses) {
-        return GroupedOpenApi.builder()
-                .group("Auth")
-                .pathsToMatch("/api/auth/**")
-                .addOpenApiCustomizer(commonErrorResponses)
-                .build();
-    }
-
-
-     @Bean
-     GroupedOpenApi allApis() {
-         return GroupedOpenApi.builder()
-                 .group("All APIs")
-                 .pathsToMatch("/**")
-                 .build();
-     }
 }

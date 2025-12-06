@@ -1,6 +1,7 @@
 spring:
+  # 기본 프로필 설정
   profiles:
-    active: dev # 기본 프로필
+    active: dev
     group:
       dev:
         - common
@@ -8,6 +9,8 @@ spring:
       prod:
         - common
         - prod
+
+  # JPA 기본 설정 (feat/#20)
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,16 +18,38 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+  
+  # 파일 업로드 사이즈 제한 (develop)
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
 
+# 서버 포트 (develop)
+server:
+  port: ${SERVER_PORT}
+
+# JWT 비밀키 (feat/#20)
 jwt:
   secret: ${JWT_SECRET_KEY}
 
+# Supabase 설정 (develop)
+supabase:
+  url: ${SUPABASE_URL}
+  service-key: ${SUPABASE_SERVICE_KEY}
+  buckets:
+    image: ${SUPABASE_IMAGE_BUCKET}
+    audio: ${SUPABASE_AUDIO_BUCKET}
+    character: ${SUPABASE_CHARACTER_BUCKET}
+
 ---
+# 공통 프로필 (common)
 spring:
   config:
     activate:
       on-profile: common
 
+# 카카오 설정 (feat/#20)
 kakao:
   client-id: ${KAKAO_CLIENT_ID}
   redirect-uri: ${KAKAO_REDIRECT_URI}
