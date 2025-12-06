@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micrometer.common.lang.Nullable;
 import org.springframework.http.HttpStatus;
 import pproject.once_upon_a_time.global.exception.CustomException;
+import pproject.once_upon_a_time.global.exception.ExceptionDto;
 
 public record ApiResult<T>(
         @JsonIgnore HttpStatus httpStatus,
