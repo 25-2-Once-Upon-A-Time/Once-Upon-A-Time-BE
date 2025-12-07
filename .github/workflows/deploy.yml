@@ -46,8 +46,9 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-          script_stop: false
           script: |
+            #!/bin/bash
+            
             cd /home/t25301/backend
             
             echo "Loading .env variables..."
@@ -60,9 +61,15 @@ jobs:
               echo "⚠️ Warning: .env file not found"
             fi
             
-            echo "Stopping previous Spring Boot..."
-            pkill -u t25301 -f "java -jar" 2>/dev/null || echo "No previous process found"
-            sleep 2
+            echo "Checking for running Spring Boot process..."
+            if pgrep -u t25301 -f "java -jar" > /dev/null; then
+              echo "Found running process. Stopping..."
+              pkill -u t25301 -f "java -jar"
+              sleep 2
+              echo "Previous process stopped"
+            else
+              echo "No previous process found (first deployment or already stopped)"
+            fi
             
             echo "Finding latest JAR..."
             LATEST_JAR=$(ls -t *SNAPSHOT.jar 2>/dev/null | head -n 1)
