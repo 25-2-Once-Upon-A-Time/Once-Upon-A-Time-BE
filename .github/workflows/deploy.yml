@@ -43,6 +43,11 @@ jobs:
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
           script: |
             cd /home/t25301/backend
+            
+            echo "Loading .env variables..."
+            set -o allexport
+            source .env
+            set +o allexport
 
             echo "Stopping previous Spring Boot (only this team's process)..."
             pkill -u t25301 -f "java -jar" || true
