@@ -49,7 +49,7 @@ jobs:
           script: |
             cd /home/t25301/backend
             
-            # Step 1: Load environment variables from .env file
+            # Step 1: Load environment variables
             echo "Loading .env variables..."
             if [ -f .env ]; then
               set -o allexport
@@ -60,21 +60,21 @@ jobs:
               echo "⚠️ Warning: .env file not found"
             fi
             
-            # Step 2: Check if Spring Boot is already running
-            echo "Checking for running Spring Boot process..."
-            RUNNING_PID=$(pgrep -u t25301 -f "java -jar" || echo "")
+            # Step 2: Check BEFORE starting
+            echo "=== BEFORE START ==="
+            ps -u t25301 -f
+            BEFORE_COUNT=$(pgrep -u t25301 -f "java -jar" | wc -l)
+            echo "Java processes before: $BEFORE_COUNT"
             
-            # Step 3: Stop existing process if found
-            if [ -n "$RUNNING_PID" ]; then
-              echo "Found running process (PID: $RUNNING_PID). Stopping..."
-              kill $RUNNING_PID 2>/dev/null || true
-              sleep 2
-              echo "Previous process stopped"
-            else
-              echo "No previous process found (first deployment or already stopped)"
-            fi
+            # Step 3: Clean up any existing processes
+            echo "Cleaning up existing processes..."
+            for pid in $(pgrep -u t25301 -f "java -jar" 2>/dev/null); do
+              echo "Killing PID: $pid"
+              kill -9 $pid 2>/dev/null || true
+            done
+            sleep 2
             
-            # Step 4: Find the latest JAR file
+            # Step 4: Find latest JAR
             echo "Finding latest JAR..."
             LATEST_JAR=$(ls -t *SNAPSHOT.jar 2>/dev/null | head -n 1)
             
@@ -86,17 +86,28 @@ jobs:
             
             echo "Using: $LATEST_JAR"
             
-            # Step 5: Start new Spring Boot application
+            # Step 5: Start ONE process
             echo "Starting Spring Boot..."
             nohup java -jar $LATEST_JAR > app.log 2>&1 &
+            JAVA_PID=$!
+            echo "Started with PID: $JAVA_PID"
             
             sleep 3
             
-            # Step 6: Verify the application started successfully
+            # Step 6: Check AFTER starting
+            echo "=== AFTER START ==="
+            ps -u t25301 -f
+            AFTER_COUNT=$(pgrep -u t25301 -f "java -jar" | wc -l)
+            echo "Java processes after: $AFTER_COUNT"
+            
+            # Step 7: Verify
             echo "Checking if process is running..."
-            if pgrep -u t25301 -f "java -jar" > /dev/null; then
-              echo "✅ SUCCESS: Spring Boot is running"
-              ps -u t25301 | grep java
+            if [ "$AFTER_COUNT" -eq 1 ]; then
+              echo "✅ SUCCESS: Exactly 1 Spring Boot process running"
+              ps -u t25301 -f | grep java
+            elif [ "$AFTER_COUNT" -gt 1 ]; then
+              echo "⚠️ WARNING: Multiple processes detected ($AFTER_COUNT)"
+              ps -u t25301 -f | grep java
             else
               echo "❌ ERROR: Spring Boot did NOT start"
               echo "---- Last 50 lines of app.log ----"
