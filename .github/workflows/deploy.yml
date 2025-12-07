@@ -24,7 +24,11 @@ jobs:
       - name: Build Spring Boot JAR
         run: ./gradlew clean build -x test
 
-      # 4. Upload ONLY bootJar (exclude plain.jar)
+      # 4. Debug JAR list
+      - name: Show built artifacts
+        run: ls -l build/libs
+
+      # 5. Upload ONLY bootJar to server (strip folders)
       - name: Upload Boot JAR to Server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -33,8 +37,10 @@ jobs:
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
           source: "build/libs/*SNAPSHOT.jar"
           target: "/home/t25301/backend/"
+          strip_components: 2
+          debug: true
 
-      # 5. Restart Spring Boot on Server
+      # 6. Restart Spring Boot on Server
       - name: Restart Spring Boot on Server
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -44,11 +50,28 @@ jobs:
           script: |
             cd /home/t25301/backend
 
-            echo "Stopping previous Spring Boot (only this team's process)..."
+            echo "Stopping previous Spring Boot (this team's process)..."
             pkill -u t25301 -f "java -jar" || true
 
-            echo "Starting new Spring Boot application..."
-            LATEST_JAR=$(ls -t *SNAPSHOT.jar | head -n 1)
+            echo "Finding latest JAR..."
+            LATEST_JAR=$(ls -t *.jar | head -n 1)
+            echo "Using: $LATEST_JAR"
 
+            echo "Starting Spring Boot..."
             nohup java -jar $LATEST_JAR > app.log 2>&1 &
-            echo "Backend started with JAR: $LATEST_JAR"
+
+            echo "Waiting 3 seconds for startup..."
+            sleep 3
+
+            echo "Checking if process is running..."
+            RUNNING=$(ps -u t25301 | grep java || true)
+
+            if [ -z "$RUNNING" ]; then
+              echo "❌ ERROR: Spring Boot did NOT start properly."
+              echo "---- app.log ----"
+              tail -n 50 app.log
+              exit 1
+            else
+              echo "✅ SUCCESS: Spring Boot is running."
+              echo "$RUNNING"
+            fi
