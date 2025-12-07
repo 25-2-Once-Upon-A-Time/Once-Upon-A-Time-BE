@@ -48,6 +48,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
           script: |
             #!/bin/bash
+            set +e  # 에러 무시 모드 활성화
             
             cd /home/t25301/backend
             
@@ -91,6 +92,7 @@ jobs:
             if pgrep -u t25301 -f "java -jar" > /dev/null; then
               echo "✅ SUCCESS: Spring Boot is running"
               ps -u t25301 | grep java
+              exit 0
             else
               echo "❌ ERROR: Spring Boot did NOT start"
               echo "---- Last 50 lines of app.log ----"
