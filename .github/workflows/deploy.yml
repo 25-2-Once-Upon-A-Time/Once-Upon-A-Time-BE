@@ -60,16 +60,10 @@ jobs:
               echo "⚠️ Warning: .env file not found"
             fi
             
-            # Step 2: Check BEFORE starting
-            echo "=== BEFORE START ==="
-            ps -u t25301 -f
-            BEFORE_COUNT=$(pgrep -u t25301 -f "java -jar" | wc -l)
-            echo "Java processes before: $BEFORE_COUNT"
-            
-            # Step 3: Clean up any existing processes
-            echo "Cleaning up existing processes..."
-            for pid in $(pgrep -u t25301 -f "java -jar" 2>/dev/null); do
-              echo "Killing PID: $pid"
+            # Step 2 & 3: Kill only actual Java processes (not bash scripts)
+            echo "Stopping existing Spring Boot processes..."
+            for pid in $(pgrep -u t25301 -f "^java.*\.jar" 2>/dev/null); do
+              echo "Killing Java PID: $pid"
               kill -9 $pid 2>/dev/null || true
             done
             sleep 2
@@ -86,28 +80,19 @@ jobs:
             
             echo "Using: $LATEST_JAR"
             
-            # Step 5: Start ONE process
+            # Step 5: Start Spring Boot
             echo "Starting Spring Boot..."
             nohup java -jar $LATEST_JAR > app.log 2>&1 &
-            JAVA_PID=$!
-            echo "Started with PID: $JAVA_PID"
             
             sleep 3
             
-            # Step 6: Check AFTER starting
-            echo "=== AFTER START ==="
-            ps -u t25301 -f
-            AFTER_COUNT=$(pgrep -u t25301 -f "java -jar" | wc -l)
-            echo "Java processes after: $AFTER_COUNT"
-            
-            # Step 7: Verify
+            # Step 6: Verify (with better pattern)
             echo "Checking if process is running..."
-            if [ "$AFTER_COUNT" -eq 1 ]; then
-              echo "✅ SUCCESS: Exactly 1 Spring Boot process running"
-              ps -u t25301 -f | grep java
-            elif [ "$AFTER_COUNT" -gt 1 ]; then
-              echo "⚠️ WARNING: Multiple processes detected ($AFTER_COUNT)"
-              ps -u t25301 -f | grep java
+            RUNNING=$(pgrep -u t25301 -f "^java.*\.jar" 2>/dev/null || echo "")
+            
+            if [ -n "$RUNNING" ]; then
+              echo "✅ SUCCESS: Spring Boot is running"
+              ps -u t25301 -f | grep "[j]ava"
             else
               echo "❌ ERROR: Spring Boot did NOT start"
               echo "---- Last 50 lines of app.log ----"
