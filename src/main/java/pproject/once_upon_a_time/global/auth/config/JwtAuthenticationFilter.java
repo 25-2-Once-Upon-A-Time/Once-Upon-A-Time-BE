@@ -1,4 +1,4 @@
-package pproject.once_upon_a_time.auth.config;
+package pproject.once_upon_a_time.global.auth.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,4 +1,4 @@
-package pproject.once_upon_a_time.auth.dto.request;
+package pproject.once_upon_a_time.global.auth.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
