@@ -1,14 +1,14 @@
-package pproject.once_upon_a_time.auth.service;
+package pproject.once_upon_a_time.global.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pproject.once_upon_a_time.auth.config.JwtProvider;
-import pproject.once_upon_a_time.auth.dto.request.KakaoSignupRequestDto;
-import pproject.once_upon_a_time.auth.dto.response.KakaoLoginResponseDto;
-import pproject.once_upon_a_time.auth.dto.response.KakaoTokenResponseDto;
-import pproject.once_upon_a_time.auth.dto.response.KakaoUserInfoResponseDto;
-import pproject.once_upon_a_time.auth.dto.response.TokenResponseDto;
+import pproject.once_upon_a_time.global.auth.config.JwtProvider;
+import pproject.once_upon_a_time.global.auth.dto.request.KakaoSignupRequestDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoLoginResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoTokenResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoUserInfoResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.TokenResponseDto;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.member.repository.MemberRepository;
 import pproject.once_upon_a_time.domain.token.domain.RefreshToken;
