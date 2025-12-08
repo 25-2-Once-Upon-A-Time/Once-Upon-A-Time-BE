@@ -1,4 +1,4 @@
-package pproject.once_upon_a_time.auth.config;
+package pproject.once_upon_a_time.global.auth.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -15,9 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import pproject.once_upon_a_time.auth.dto.response.TokenResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.TokenResponseDto;
 import pproject.once_upon_a_time.domain.member.domain.Member;
-import pproject.once_upon_a_time.global.common.MemberRole;
 
 import java.security.Key;
 import java.util.Arrays;

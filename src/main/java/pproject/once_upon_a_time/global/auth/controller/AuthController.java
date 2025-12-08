@@ -1,14 +1,14 @@
-package pproject.once_upon_a_time.auth.controller;
+package pproject.once_upon_a_time.global.auth.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pproject.once_upon_a_time.auth.dto.request.KakaoSignupRequestDto;
-import pproject.once_upon_a_time.auth.dto.response.KakaoLoginResponseDto;
-import pproject.once_upon_a_time.auth.dto.response.KakaoRedirectUrlResponseDto;
-import pproject.once_upon_a_time.auth.dto.response.TokenResponseDto;
-import pproject.once_upon_a_time.auth.service.AuthService;
-import pproject.once_upon_a_time.auth.service.KakaoAuthService;
+import pproject.once_upon_a_time.global.auth.dto.request.KakaoSignupRequestDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoLoginResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoRedirectUrlResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.TokenResponseDto;
+import pproject.once_upon_a_time.global.auth.service.AuthService;
+import pproject.once_upon_a_time.global.auth.service.KakaoAuthService;
 import pproject.once_upon_a_time.global.response.ApiResult;
 
 @RestController

@@ -1,4 +1,4 @@
-package pproject.once_upon_a_time.auth.service;
+package pproject.once_upon_a_time.global.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
-import pproject.once_upon_a_time.auth.dto.response.KakaoTokenResponseDto;
-import pproject.once_upon_a_time.auth.dto.response.KakaoUserInfoResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoTokenResponseDto;
+import pproject.once_upon_a_time.global.auth.dto.response.KakaoUserInfoResponseDto;
 import pproject.once_upon_a_time.global.exception.CustomException;
 import pproject.once_upon_a_time.global.exception.ErrorCode;
 
