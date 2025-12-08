@@ -1,4 +1,4 @@
-package pproject.once_upon_a_time.global.auth.config;
+package pproject.once_upon_a_time.auth.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

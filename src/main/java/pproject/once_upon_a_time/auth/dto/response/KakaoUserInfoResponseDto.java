@@ -1,4 +1,4 @@
-package pproject.once_upon_a_time.global.auth.dto.response;
+package pproject.once_upon_a_time.auth.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
