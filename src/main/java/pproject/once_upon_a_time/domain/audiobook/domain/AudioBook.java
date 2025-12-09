@@ -2,6 +2,9 @@ package pproject.once_upon_a_time.domain.audiobook.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pproject.once_upon_a_time.domain.character.domain.Character;
+import pproject.once_upon_a_time.domain.member.domain.Member;
+import pproject.once_upon_a_time.domain.story.domain.Story;
 
 @Getter
 @Setter
@@ -15,14 +18,20 @@ public class AudioBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "audiobook_id", nullable = false)
-    private Long audiobookId; // 고유 식별자
+    private Long audiobookId; // PK
 
     @Column(name = "audio_url", length = 255)
     private String audioUrl; // WAV 파일 경로
 
-    @Column(name = "story_id", nullable = false)
-    private Long storyId; // 원본 동화 ID (FK)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "story_id", insertable = false, updatable = false)
+    private Story story;
 
-    @Column(name = "character_id", nullable = false)
-    private Long characterId; // 캐릭터 ID (FK)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "character_id", insertable = false, updatable = false)
+    private Character character;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", insertable = false, updatable = false)
+    private Member member;
 }

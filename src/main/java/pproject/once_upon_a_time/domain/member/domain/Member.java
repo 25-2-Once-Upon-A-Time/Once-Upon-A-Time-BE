@@ -6,8 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pproject.once_upon_a_time.global.common.MemberRole;
+import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,6 +40,9 @@ public class Member {
 
     @Column(length = 20)
     private String personalPhone;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<AudioBook> audioBooks;
 
     @Builder
     public Member(String kakaoUserId, String name, String nickname, MemberRole role, String gender, LocalDate birth, String personalPhone) {
