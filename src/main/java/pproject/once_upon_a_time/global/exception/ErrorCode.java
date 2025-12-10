@@ -17,6 +17,10 @@ public enum ErrorCode {
     INVALID_INPUT(400_002, HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
     NULL_VALUE(400_003, HttpStatus.BAD_REQUEST, "Null 값이 들어왔습니다."),
     TEST_ERROR(400_004, HttpStatus.BAD_REQUEST, "테스트 에러입니다."),
+    INVALID_PROGRESS(400_005, HttpStatus.BAD_REQUEST, "재생 진행 정보가 올바르지 않습니다."),
+    REDIS_PLAYBACK_NOT_FOUND(400_006, HttpStatus.BAD_REQUEST, "Redis에서 재생 정보를 찾을 수 없습니다."),
+    INVALID_STATUS(400_007, HttpStatus.BAD_REQUEST, "잘못된 재생 상태입니다."),
+    REDIS_KEY_INVALID(400_008, HttpStatus.BAD_REQUEST, "잘못된 Redis 키 형식입니다."),
 
 
     // ========================
@@ -51,6 +55,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(404_001, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     USER_NOT_FOUND_IN_COOKIE(404_002, HttpStatus.NOT_FOUND, "쿠키에서 사용자 정보를 찾을 수 없습니다."),
     MEMBER_NOT_FOUND(404_003, HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
+    AUDIOBOOK_NOT_FOUND(404_004, HttpStatus.NOT_FOUND, "오디오북을 찾을 수 없습니다."),
+    PLAYBACK_NOT_FOUND(404_005, HttpStatus.NOT_FOUND, "재생 정보를 찾을 수 없습니다."),
 
 
     // ========================
@@ -66,6 +72,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(500_000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
     KAKAO_TOKEN_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 토큰을 가져오는 중 오류가 발생했습니다."),
     KAKAO_USER_INFO_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 사용자 정보를 가져오는 중 오류가 발생했습니다."),
+    REDIS_CONNECTION_FAILED(500_003, HttpStatus.INTERNAL_SERVER_ERROR, "Redis 연결에 실패했습니다."),
 
     ;
 
