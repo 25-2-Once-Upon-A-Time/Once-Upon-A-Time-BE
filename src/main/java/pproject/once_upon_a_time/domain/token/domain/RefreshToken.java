@@ -22,4 +22,8 @@ public class RefreshToken {
 
     @Column(nullable = false, length = 512)
     private String token;
+
+    public void updateToken(String token) {
+        this.token = token;
+    }
 }

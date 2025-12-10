@@ -3,6 +3,7 @@ package pproject.once_upon_a_time.domain.selection.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import pproject.once_upon_a_time.domain.character.domain.Character;
+import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.story.domain.Story;
 
 @Getter
@@ -26,6 +27,7 @@ public class UserStoryCharacterSelection {
     @JoinColumn(name = "character_id", nullable = false)
     private Character character;
 
-    @Column(nullable = false)
-    private String memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member memberId;
 }

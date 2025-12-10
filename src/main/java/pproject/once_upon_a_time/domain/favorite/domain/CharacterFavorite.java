@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pproject.once_upon_a_time.domain.character.domain.Character;
 
 import java.time.LocalDateTime;
+import pproject.once_upon_a_time.domain.member.domain.Member;
 
 @Getter
 @Builder
@@ -26,8 +27,9 @@ public class CharacterFavorite {
     @JoinColumn(name = "character_id", nullable = false)
     private Character character;
 
-    @Column(nullable = false)
-    private String memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member memberId;
     
     @CreatedDate
     @Column(updatable = false)

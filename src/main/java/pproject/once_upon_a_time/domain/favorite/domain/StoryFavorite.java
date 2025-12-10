@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.story.domain.Story;
 
 import java.time.LocalDateTime;
@@ -26,8 +27,9 @@ public class StoryFavorite {
     @JoinColumn(name = "story_id", nullable = false)
     private Story story;
 
-    @Column(nullable = false)
-    private String memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member memberId;
 
     @CreatedDate
     @Column(updatable = false)

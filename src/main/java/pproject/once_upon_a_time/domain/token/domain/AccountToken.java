@@ -2,6 +2,7 @@ package pproject.once_upon_a_time.domain.token.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 
 import java.time.LocalDateTime;
@@ -19,8 +20,9 @@ public class AccountToken extends BaseTimeEntity {
     @Column(name = "token_id")
     private Long id;
 
-    @Column(nullable = false)
-    private String memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member memberId;
 
     @Column(length = 200)
     private String ipAddress;

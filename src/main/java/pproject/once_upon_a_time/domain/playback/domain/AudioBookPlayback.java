@@ -3,6 +3,7 @@ package pproject.once_upon_a_time.domain.playback.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
+import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 
 import java.time.LocalDateTime;
@@ -24,8 +25,9 @@ public class AudioBookPlayback extends BaseTimeEntity {
     @JoinColumn(name = "audiobook_id", nullable = false)
     private AudioBook audioBook;
 
-    @Column(nullable = false)
-    private String memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member memberId;
 
     private Integer lastPosition;
 
