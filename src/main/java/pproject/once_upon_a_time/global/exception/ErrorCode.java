@@ -51,6 +51,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(404_001, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     USER_NOT_FOUND_IN_COOKIE(404_002, HttpStatus.NOT_FOUND, "쿠키에서 사용자 정보를 찾을 수 없습니다."),
     MEMBER_NOT_FOUND(404_003, HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
+    CHARACTER_NOT_FOUND(404_004, HttpStatus.NOT_FOUND, "캐릭터를 찾을 수 없습니다."),
+    STORY_NOT_FOUND(404_005, HttpStatus.NOT_FOUND, "동화를 찾을 수 없습니다."),
 
 
     // ========================
