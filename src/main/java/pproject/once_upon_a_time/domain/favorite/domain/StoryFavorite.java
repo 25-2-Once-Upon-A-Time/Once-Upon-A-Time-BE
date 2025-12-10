@@ -2,31 +2,36 @@ package pproject.once_upon_a_time.domain.favorite.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pproject.once_upon_a_time.domain.member.domain.Member;
+import pproject.once_upon_a_time.domain.story.domain.Story;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "story_favorites")
 public class StoryFavorite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "story_favorite_id", nullable = false)
-    private Long storyFavoriteId; // 고유 ID
+    @Column(name = "story_favorite_id")
+    private Long id;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // 찜한 날짜
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "story_id", nullable = false)
+    private Story story;
 
-    @Column(name = "story_id", nullable = false)
-    private Long storyId; // 찜한 동화 ID (FK)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member memberId;
 
-    @Column(name = "member_id", length = 255, nullable = false)
-    private String memberId; // 사용자 ID (FK)
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -2,45 +2,34 @@ package pproject.once_upon_a_time.domain.timer.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import pproject.once_upon_a_time.domain.playback.domain.AudioBookPlayback;
+import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "sleep_timers")
-public class SleepTimer {
+public class SleepTimer extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "timer_id", nullable = false)
-    private Long timerId; // 타이머 ID
+    @Column(name = "timer_id")
+    private Long id;
 
-    @Column(name = "dutation_seconds")
-    private Integer dutationSeconds; // 설정 타이머 시간 (초)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "playback_id", nullable = false)
+    private AudioBookPlayback playback;
 
-    @Column(name = "expires_at")
-    private LocalDateTime expiresAt; // 타이머 만료 예정 시각
+    @Column(nullable = false)
+    private String memberId;
 
-    @Column(name = "is_active")
-    private Boolean isActive; // 현재 타이머 활성 여부
+    private Integer dutationSeconds;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // 생성일
+    private LocalDateTime expiresAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt; // 수정일
-
-    @Column(name = "playback_id", nullable = false)
-    private Long playbackId; // 재생 ID (FK)
-
-    @Column(name = "member_id", length = 255, nullable = false)
-    private String memberId; // 회원 ID (FK)
+    private Boolean isActive;
 }
