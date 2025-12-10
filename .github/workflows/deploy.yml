@@ -82,7 +82,10 @@ jobs:
             
             # Step 5: Start Spring Boot
             echo "Starting Spring Boot..."
-            nohup java -jar $LATEST_JAR > app.log 2>&1 &
+            nohup java -jar $LATEST_JAR \
+              --spring.profiles.active=$SPRING_PROFILES_ACTIVE \
+              --server.port=$SERVER_PORT > app.log 2>&1 &
+
             
             sleep 3
             
