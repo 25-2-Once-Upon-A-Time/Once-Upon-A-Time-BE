@@ -2,31 +2,34 @@ package pproject.once_upon_a_time.domain.favorite.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import pproject.once_upon_a_time.domain.character.domain.Character;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "character_favorites")
 public class CharacterFavorite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "character_favorite_id", nullable = false)
-    private Long characterFavoriteId; // 캐릭터 찜 ID (PK)
+    @Column(name = "character_favorite_id")
+    private Long id;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // 찜 생성일
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "character_id", nullable = false)
+    private Character character;
 
-    @Column(name = "character_id", nullable = false)
-    private Long characterId; // 캐릭터 ID (FK)
-
-    @Column(name = "member_id", length = 255, nullable = false)
-    private String memberId; // 사용자 ID (FK)
+    @Column(nullable = false)
+    private String memberId;
+    
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 }

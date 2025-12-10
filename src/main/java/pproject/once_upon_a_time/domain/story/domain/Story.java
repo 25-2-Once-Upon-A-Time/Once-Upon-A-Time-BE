@@ -2,60 +2,82 @@ package pproject.once_upon_a_time.domain.story.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import pproject.once_upon_a_time.domain.story.converter.KeywordsConverter;
+import pproject.once_upon_a_time.domain.story.converter.ScriptConverter;
+import pproject.once_upon_a_time.domain.story.dto.ScriptItem;
+import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "stories")
-public class Story {
+public class Story extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "story_id", nullable = false)
-    private Long storyId; // 고유 ID
+    @Column(name = "story_id")
+    private Long id;
 
-    @Column(name = "title", length = 100)
-    private String title; // 동화 제목
+    // [메타데이터 그룹]
+    @Column(name = "project_name")
+    private String projectName;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description; // 동화 줄거리 요약
+    @Column(length = 50)
+    private String version;
 
-    @Column(name = "content", columnDefinition = "LONGTEXT")
-    private String content; // 동화 본문
+    @Column(length = 50)
+    private String modelType;
 
+    private Integer totalSegments;
+
+    // [스토리 정보 그룹]
+    private String title;
+
+    @Column(length = 100)
+    private String theme;
+
+    @Column(length = 100)
+    private String vibe;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String originalPrompt;
+
+    @Column(length = 50)
+    private String targetAge;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+
+    // [JSON 데이터 그룹]
+    @Convert(converter = KeywordsConverter.class)
+    @Column(columnDefinition = "json")
+    private List<String> keywords;
+
+    @Convert(converter = ScriptConverter.class)
+    @Column(columnDefinition = "json")
+    private List<ScriptItem> script;
+
+    // [본문 및 미디어]
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String content;
+    
+    @Column(length = 500)
+    private String thumbnailUrl;
+
+    // [상태 및 로그]
     @Enumerated(EnumType.STRING)
-    @Column(name = "generation_status")
-    private GenerationStatus generationStatus; // 생성 상태
+    private GenerationStatus generationStatus;
 
-    @Column(name = "tags", length = 200)
-    private String tags; // 태그
+    @Column(length = 50)
+    private String verificationStatus;
 
-    @Column(name = "thumbnail_url", length = 500)
-    private String thumbnailUrl; // 썸네일 이미지 URL
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // 생성 요청 시각
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt; // 수정일
-
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt; // 생성 완료 시각
-
-    // ENUM 정의
-    public enum GenerationStatus {
-        pending,
-        processing,
-        completed,
-        failed
-    }
+    private LocalDateTime completedAt;
 }
