@@ -95,7 +95,7 @@ public class AuthService {
             refreshToken.updateToken(tokenResponseDto.getRefreshToken());
         } else {
             RefreshToken refreshToken = RefreshToken.builder()
-                    .memberId(member.getId())
+                    .member(member)
                     .token(tokenResponseDto.getRefreshToken())
                     .build();
             refreshTokenRepository.save(refreshToken);

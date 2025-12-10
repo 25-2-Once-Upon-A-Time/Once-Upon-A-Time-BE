@@ -12,7 +12,7 @@ public interface AudioBookRepository extends JpaRepository<AudioBook, Long> {
 
     @Query("""
             select new pproject.once_upon_a_time.domain.audiobook.dto.AudioBookResponseDto$Item(
-                a.audiobookId,
+                a.id,
                 s.title
             )
             from AudioBook a

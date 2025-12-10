@@ -8,7 +8,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import pproject.once_upon_a_time.auth.config.JwtProvider;
+import pproject.once_upon_a_time.global.auth.config.JwtProvider;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.member.repository.MemberRepository;
 import pproject.once_upon_a_time.global.exception.CustomException;
