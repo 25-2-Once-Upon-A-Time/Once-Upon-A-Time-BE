@@ -17,3 +17,6 @@ spring:
         dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: false
     show-sql: false
+
+server:
+  port: 60008

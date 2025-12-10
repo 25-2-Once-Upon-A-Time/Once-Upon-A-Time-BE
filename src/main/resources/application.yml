@@ -25,9 +25,6 @@ spring:
       max-file-size: 25MB
       max-request-size: 25MB
 
-# 서버 포트 (develop)
-server:
-  port: ${SERVER_PORT}
 
 # JWT 비밀키 (feat/#20)
 jwt:
