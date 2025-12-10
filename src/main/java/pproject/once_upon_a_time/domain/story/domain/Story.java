@@ -2,9 +2,6 @@ package pproject.once_upon_a_time.domain.story.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pproject.once_upon_a_time.domain.story.converter.KeywordsConverter;
-import pproject.once_upon_a_time.domain.story.converter.ScriptConverter;
-import pproject.once_upon_a_time.domain.story.dto.ScriptItem;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 
 import java.time.LocalDateTime;
@@ -55,14 +52,14 @@ public class Story extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
-    // [JSON 데이터 그룹]
-    @Convert(converter = KeywordsConverter.class)
-    @Column(columnDefinition = "json")
-    private List<String> keywords;
-
-    @Convert(converter = ScriptConverter.class)
-    @Column(columnDefinition = "json")
-    private List<ScriptItem> script;
+//    // [JSON 데이터 그룹]
+//    @Convert(converter = KeywordsConverter.class)
+//    @Column(columnDefinition = "json")
+//    private List<String> keywords;
+//
+//    @Convert(converter = ScriptConverter.class)
+//    @Column(columnDefinition = "json")
+//    private List<ScriptItem> script;
 
     // [본문 및 미디어]
     @Lob
@@ -73,8 +70,8 @@ public class Story extends BaseTimeEntity {
     private String thumbnailUrl;
 
     // [상태 및 로그]
-    @Enumerated(EnumType.STRING)
-    private GenerationStatus generationStatus;
+//    @Enumerated(EnumType.STRING)
+//    private GenerationStatus generationStatus;
 
     @Column(length = 50)
     private String verificationStatus;
