@@ -2,9 +2,11 @@ package pproject.once_upon_a_time.domain.member.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
 import pproject.once_upon_a_time.global.common.MemberRole;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Builder
@@ -38,4 +40,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<AudioBook> audioBooks;
 }
