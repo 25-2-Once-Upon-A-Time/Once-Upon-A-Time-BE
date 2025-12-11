@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class KakaoSignupRequestDto {
-    private String kakaoUserId;
+public class SignupRequestDto {
+    // kakaoUserId가 제거됨
     private String name;
     private String gender;
     private String birth; // "YYYY.MM.DD"
