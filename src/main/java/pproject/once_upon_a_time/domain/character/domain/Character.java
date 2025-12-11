@@ -41,4 +41,19 @@ public class Character extends BaseTimeEntity {
 
     @Column(nullable = false, length = 500)
     private String voiceSampleUrl;
+
+    @Column(name = "voice_actor", length = 100)
+    private String voiceActor;
+
+    // 태그(JSON)
+    @Column(columnDefinition = "JSON")
+    private String tags;     // ex: ["애니메이션", "여자아이"]
+
+    // GPT-SoVITS 모델 경로
+    @Column(name = "model_path", length = 500)
+    private String modelPath;
+
+    // AIHub Speaker ID
+    @Column(name = "speaker_id", length = 50)
+    private String speakerId;
 }
