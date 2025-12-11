@@ -52,7 +52,7 @@ public class Story extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
-//    // [JSON 데이터 그룹]
+    // [JSON 데이터 그룹]
 //    @Convert(converter = KeywordsConverter.class)
 //    @Column(columnDefinition = "json")
 //    private List<String> keywords;
@@ -65,14 +65,11 @@ public class Story extends BaseTimeEntity {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String content;
-    
+
     @Column(length = 500)
     private String thumbnailUrl;
 
     // [상태 및 로그]
-//    @Enumerated(EnumType.STRING)
-//    private GenerationStatus generationStatus;
-
     @Column(length = 50)
     private String verificationStatus;
 

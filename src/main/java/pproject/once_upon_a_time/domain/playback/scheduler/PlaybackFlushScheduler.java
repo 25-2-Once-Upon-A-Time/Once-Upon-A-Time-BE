@@ -13,6 +13,7 @@ import pproject.once_upon_a_time.domain.playback.repository.AudioBookPlaybackRep
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class PlaybackFlushScheduler {
     private final PlaybackRedisRepository playbackRedisRepository;
     private final AudioBookPlaybackRepository playbackRepository;
     private final AudioBookRepository audioBookRepository;
+    private final AtomicBoolean redisDownLogged = new AtomicBoolean(false);
 
     // Redis에 임시 저장된 진행도를 주기적으로 DB에 반영한다.
     @Scheduled(fixedDelay = FLUSH_INTERVAL_MILLIS)
@@ -32,8 +34,9 @@ public class PlaybackFlushScheduler {
         Set<String> keys;
         try {
             keys = playbackRedisRepository.findAllPlaybackKeys();
+            resetRedisDownFlagIfRecovered();
         } catch (DataAccessException e) {
-            log.error("플레이백 flush 중단: Redis 키 조회 불가", e);
+            logRedisDownOnce("플레이백 flush 중단: Redis 키 조회 불가", e);
             return;
         }
         if (keys == null || keys.isEmpty()) {
@@ -53,7 +56,7 @@ public class PlaybackFlushScheduler {
                     flushToDatabase(new ParsedPlayback(info, redisValOpt.get()));
                 }
             } catch (DataAccessException e) {
-                log.error("Flush 건너뜀: Redis 오류. key={}, memberId={}, audiobookId={}", key, info.memberId(), info.audiobookId(), e);
+                logRedisDownOnce("Flush 건너뜀: Redis 오류. key={}, memberId={}, audiobookId={}", e, key, info.memberId(), info.audiobookId());
                 continue;
             } catch (Exception e) {
                 log.error("Flush 건너뜀: 예상치 못한 오류. key={}, memberId={}, audiobookId={}", key, info.memberId(), info.audiobookId(), e);
@@ -95,5 +98,17 @@ public class PlaybackFlushScheduler {
 
     private record ParsedPlayback(PlaybackRedisRepository.KeyInfo info,
                                   PlaybackRedisRepository.PlaybackRedisValue value) {
+    }
+
+    private void logRedisDownOnce(String message, DataAccessException e, Object... args) {
+        if (redisDownLogged.compareAndSet(false, true)) {
+            log.error(message, args, e);
+        }
+    }
+
+    private void resetRedisDownFlagIfRecovered() {
+        if (redisDownLogged.get()) {
+            redisDownLogged.set(false);
+        }
     }
 }
