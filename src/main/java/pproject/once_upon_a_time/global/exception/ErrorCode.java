@@ -53,6 +53,8 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(404_003, HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
     CHARACTER_NOT_FOUND(404_004, HttpStatus.NOT_FOUND, "캐릭터를 찾을 수 없습니다."),
     STORY_NOT_FOUND(404_005, HttpStatus.NOT_FOUND, "동화를 찾을 수 없습니다."),
+    AUDIOBOOK_NOT_FOUND(404_006, HttpStatus.NOT_FOUND, "오디오북을 찾을 수 없습니다."),
+    PLAYBACK_NOT_FOUND(404_007, HttpStatus.NOT_FOUND, "재생 정보를 찾을 수 없습니다."),
 
 
     // ========================

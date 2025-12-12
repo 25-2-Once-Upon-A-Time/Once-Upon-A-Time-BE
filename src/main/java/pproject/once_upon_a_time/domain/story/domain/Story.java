@@ -33,7 +33,6 @@ public class Story extends BaseTimeEntity {
     private String version;
     private String modelType;
     private Integer totalSegments;
-
     private String title;
     private String theme;
     private String vibe;
@@ -41,7 +40,7 @@ public class Story extends BaseTimeEntity {
     @Lob
     private String originalPrompt;
 
-    private String targetAge; // AI응답 필드에 없지만, 초기 요청에 있을 수 있으므로 유지.
+    private String targetAge;
 
     @Lob
     private String summary;
@@ -51,10 +50,13 @@ public class Story extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private GenerationStatus generationStatus;
+    private GenerationStatus generationStatus; // From feat/#44
+
+    @Column(length = 50)
+    private String verificationStatus; // From develop
 
     @Column(length = 500)
-    private String thumbnailUrl; // 로컬 저장 경로 (AI 응답에 없으므로 별도 처리 필요)
+    private String thumbnailUrl;
 
     private LocalDateTime completedAt;
 
