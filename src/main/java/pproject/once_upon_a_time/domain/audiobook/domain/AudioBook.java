@@ -33,4 +33,8 @@ public class AudioBook {
     
     @Column(name = "audio_url", length = 255)
     private String audioUrl;
+
+    @Column(name = "duration", nullable = false)
+    private Integer duration;
+    
 }

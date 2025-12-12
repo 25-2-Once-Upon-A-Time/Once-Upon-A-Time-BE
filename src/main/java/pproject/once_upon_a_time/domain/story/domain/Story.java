@@ -50,14 +50,14 @@ public class Story extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private GenerationStatus generationStatus;
+    private GenerationStatus generationStatus; // From feat/#44
 
     @Column(length = 50)
     private String verificationStatus;
 
     @Column(length = 500)
     private String thumbnailUrl;
-
+    
     private LocalDateTime completedAt;
 
     @Convert(converter = StringListConverter.class)

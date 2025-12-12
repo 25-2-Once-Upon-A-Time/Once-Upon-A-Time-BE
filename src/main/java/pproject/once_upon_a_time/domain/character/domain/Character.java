@@ -41,7 +41,7 @@ public class Character extends BaseTimeEntity {
 
     @Convert(converter = StringListConverter.class)
     @Column(columnDefinition = "json")
-    private List<String> tags;
+    private List<String> tags; // Using List<String> from feat/#44
 
     @Column(length = 500)
     private String modelPath;

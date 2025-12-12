@@ -43,4 +43,13 @@ public class Member {
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<AudioBook> audioBooks;
+
+    public void updateProfile(String newNickname, String newPersonalPhone) {
+        if (newNickname != null && !newNickname.isBlank()) {
+            this.nickname = newNickname;
+        }
+        if (newPersonalPhone != null && !newPersonalPhone.isBlank()) {
+            this.personalPhone = newPersonalPhone;
+        }
+    }
 }
