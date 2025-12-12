@@ -1,6 +1,7 @@
 package pproject.once_upon_a_time.global.auth.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.global.auth.dto.request.SignupRequestDto;
@@ -26,7 +27,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
-    @GetMapping("/kakao/callback")
+    @GetMapping(value = "/kakao/callback", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResult<KakaoLoginResponseDto>> kakaoLogin(@RequestParam("code") String code) {
         KakaoLoginResponseDto responseDto = authService.kakaoLogin(code);
         return ResponseEntity.ok(ApiResult.ok(responseDto));
