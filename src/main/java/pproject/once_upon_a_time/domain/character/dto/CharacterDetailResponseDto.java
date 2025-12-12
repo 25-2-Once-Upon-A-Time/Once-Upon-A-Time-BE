@@ -11,7 +11,6 @@ public class CharacterDetailResponseDto {
     private final String characterType;
     private final String description;
     private final String thumbnailUrl;
-    private final String voiceSampleUrl;
 
     public CharacterDetailResponseDto(Character character) {
         this.id = character.getId();
@@ -19,6 +18,5 @@ public class CharacterDetailResponseDto {
         this.characterType = character.getCharacterType();
         this.description = character.getDescription();
         this.thumbnailUrl = character.getThumbnailUrl();
-        this.voiceSampleUrl = character.getVoiceSampleUrl();
     }
 }

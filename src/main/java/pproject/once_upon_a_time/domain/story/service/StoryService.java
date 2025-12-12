@@ -2,48 +2,37 @@ package pproject.once_upon_a_time.domain.story.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import pproject.once_upon_a_time.domain.member.domain.Member;
+import pproject.once_upon_a_time.domain.member.repository.MemberRepository;
 import pproject.once_upon_a_time.domain.story.domain.Story;
-import pproject.once_upon_a_time.domain.story.dto.StoryCreateRequestDto;
+import pproject.once_upon_a_time.domain.story.dto.UserRequestDto;
 import pproject.once_upon_a_time.domain.story.dto.StoryCreateResponseDto;
-import pproject.once_upon_a_time.domain.story.dto.StoryDetailResponseDto;
-import pproject.once_upon_a_time.domain.story.dto.StoryListResponseDto;
-import pproject.once_upon_a_time.domain.story.repository.StoryRepository;
 import pproject.once_upon_a_time.global.exception.CustomException;
 import pproject.once_upon_a_time.global.exception.ErrorCode;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class StoryService {
 
-    private final StoryRepository storyRepository;
+    private final StoryUpdateService storyUpdateService;
+    private final AiClient aiClient;
+    private final MemberRepository memberRepository;
 
-    public List<StoryListResponseDto> findAllStories(String keyword) {
-        List<Story> stories;
-        if (keyword == null || keyword.isBlank()) {
-            stories = storyRepository.findAll();
-        } else {
-            stories = storyRepository.findByTitleContainingIgnoreCase(keyword);
+    public StoryCreateResponseDto createStory(Long memberId, UserRequestDto request) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        Story story = storyUpdateService.initiateStory(request, member);
+
+        AiResponse aiResponse = aiClient.generateStory(request);
+        if (aiResponse == null) {
+            storyUpdateService.finalizeStoryOnError(story.getId());
+            throw new RuntimeException("AI 서버로부터 응답을 받지 못했습니다.");
         }
-        return stories.stream()
-                .map(StoryListResponseDto::new)
-                .collect(Collectors.toList());
-    }
 
-    public StoryDetailResponseDto findStoryById(Long storyId) {
-        Story story = storyRepository.findById(storyId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORY_NOT_FOUND));
-        return new StoryDetailResponseDto(story);
-    }
+        storyUpdateService.finalizeStory(story.getId(), aiResponse);
 
-    @Transactional
-    public StoryCreateResponseDto createStory(StoryCreateRequestDto requestDto) {
-        Story story = requestDto.toEntity();
-        Story savedStory = storyRepository.save(story);
-        return new StoryCreateResponseDto(savedStory.getId());
+        return new StoryCreateResponseDto(story.getId());
     }
 }

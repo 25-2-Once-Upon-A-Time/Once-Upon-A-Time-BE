@@ -11,10 +11,10 @@ public class KakaoLoginResponseDto {
     // 공통 필드
     private Boolean isNewUser;
 
-    // 신규 유저일 경우
-    private String kakaoUserId;
+    // 신규 유저일 경우, 회원가입용 임시 토큰
+    private String signupToken;
 
-    // 기존 유저일 경우
+    // 기존 유저일 경우, 서비스 토큰
     private String accessToken;
     private String refreshToken;
 }

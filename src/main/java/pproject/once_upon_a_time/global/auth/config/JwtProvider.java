@@ -34,10 +34,37 @@ public class JwtProvider {
 
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7일
+    private static final long SIGNUP_TOKEN_EXPIRE_TIME = 1000 * 60 * 10; // 10분
 
     @PostConstruct
     protected void init() {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+    public String createSignupToken(String kakaoUserId) {
+        Claims claims = Jwts.claims().setSubject(kakaoUserId);
+        claims.put("type", "signup");
+
+        Date now = new Date();
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + SIGNUP_TOKEN_EXPIRE_TIME))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String getKakaoUserIdFromSignupToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            if (!"signup".equals(claims.get("type"))) {
+                return null; // Or throw an exception
+            }
+            return claims.getSubject();
+        } catch (Exception e) {
+            // ExpiredJwtException, MalformedJwtException etc.
+            return null;
+        }
     }
 
     public TokenResponseDto createToken(Member member) {
@@ -63,6 +90,11 @@ public class JwtProvider {
 
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
+
+        if (claims.get("role") == null) {
+            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+        }
+
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("role").toString().split(","))
                         .map(SimpleGrantedAuthority::new)

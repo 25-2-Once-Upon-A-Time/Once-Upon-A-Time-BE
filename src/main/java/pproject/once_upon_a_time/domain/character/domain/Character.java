@@ -3,6 +3,9 @@ package pproject.once_upon_a_time.domain.character.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
+import pproject.once_upon_a_time.global.common.StringListConverter;
+
+import java.util.List;
 
 @Getter
 @Builder
@@ -27,18 +30,20 @@ public class Character extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Integer displayOrder;
-
-    private Boolean isActive;
-
-    private Boolean isPremium;
-
     @Column(length = 500)
     private String thumbnailUrl;
+    
+    // --- 신규 추가 필드 ---
+    @Column(length = 100)
+    private String voiceActor;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "json")
+    private List<String> tags;
 
     @Column(length = 500)
-    private String voiceFileUrl;
+    private String modelPath;
 
-    @Column(nullable = false, length = 500)
-    private String voiceSampleUrl;
+    @Column(length = 50)
+    private String speakerId;
 }
