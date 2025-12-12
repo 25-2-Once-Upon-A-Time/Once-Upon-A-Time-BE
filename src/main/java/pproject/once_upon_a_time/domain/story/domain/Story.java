@@ -33,7 +33,6 @@ public class Story extends BaseTimeEntity {
     private String version;
     private String modelType;
     private Integer totalSegments;
-
     private String title;
     private String theme;
     private String vibe;
@@ -41,7 +40,7 @@ public class Story extends BaseTimeEntity {
     @Lob
     private String originalPrompt;
 
-    private String targetAge; // AI응답 필드에 없지만, 초기 요청에 있을 수 있으므로 유지.
+    private String targetAge;
 
     @Lob
     private String summary;
@@ -51,11 +50,14 @@ public class Story extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private GenerationStatus generationStatus;
+    private GenerationStatus generationStatus; // From feat/#44
+
+    @Column(length = 50)
+    private String verificationStatus; // From develop
 
     @Column(length = 500)
-    private String thumbnailUrl; // 로컬 저장 경로 (AI 응답에 없으므로 별도 처리 필요)
-
+    private String thumbnailUrl;
+    
     private LocalDateTime completedAt;
 
     @Convert(converter = StringListConverter.class)
@@ -85,7 +87,6 @@ public class Story extends BaseTimeEntity {
         this.keywords = keywords;
     }
 
-    // AI 응답으로 엔티티를 업데이트하기 위한 메서드
     public void updateWithAiResponse(String content, String summary, List<String> keywords, String projectName, String version, String modelType, Integer totalSegments) {
         this.content = content;
         this.summary = summary;

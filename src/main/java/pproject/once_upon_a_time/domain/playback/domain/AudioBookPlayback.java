@@ -40,5 +40,5 @@ public class AudioBookPlayback extends BaseTimeEntity {
     private LocalDateTime endedAt;
 
     @Enumerated(EnumType.STRING)
-    private AudioBookStatus status;
+    private PlaybackStatus status;
 }
