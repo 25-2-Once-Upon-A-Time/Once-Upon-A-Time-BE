@@ -34,11 +34,14 @@ public class Character extends BaseTimeEntity {
     private String thumbnailUrl;
 
     @Column(nullable = false, length = 500)
-    private String voiceSampleUrl; // From develop
+    private String voiceSampleUrl;
+
+    @Column(length = 100)
+    private String voiceActor;
 
     @Convert(converter = StringListConverter.class)
     @Column(columnDefinition = "json")
-    private List<String> tags; // Using List<String> from feat/#44
+    private List<String> tags;
 
     @Column(length = 500)
     private String modelPath;

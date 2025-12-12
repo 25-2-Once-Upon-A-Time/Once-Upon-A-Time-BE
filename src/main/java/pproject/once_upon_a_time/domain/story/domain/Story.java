@@ -50,10 +50,10 @@ public class Story extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private GenerationStatus generationStatus; // From feat/#44
+    private GenerationStatus generationStatus;
 
     @Column(length = 50)
-    private String verificationStatus; // From develop
+    private String verificationStatus;
 
     @Column(length = 500)
     private String thumbnailUrl;
@@ -87,7 +87,6 @@ public class Story extends BaseTimeEntity {
         this.keywords = keywords;
     }
 
-    // AI 응답으로 엔티티를 업데이트하기 위한 메서드
     public void updateWithAiResponse(String content, String summary, List<String> keywords, String projectName, String version, String modelType, Integer totalSegments) {
         this.content = content;
         this.summary = summary;
@@ -97,7 +96,7 @@ public class Story extends BaseTimeEntity {
         this.modelType = modelType;
         this.totalSegments = totalSegments;
     }
-    
+
     public void completeGeneration() {
         this.generationStatus = GenerationStatus.COMPLETED;
     }
