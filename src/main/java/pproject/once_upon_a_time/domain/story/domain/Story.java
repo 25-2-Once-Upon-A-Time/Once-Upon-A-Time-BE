@@ -1,18 +1,23 @@
 package pproject.once_upon_a_time.domain.story.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import pproject.once_upon_a_time.domain.member.domain.Member;
+import pproject.once_upon_a_time.domain.script.domain.Script;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
+import pproject.once_upon_a_time.global.common.StringListConverter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "stories")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Story extends BaseTimeEntity {
 
     @Id
@@ -20,58 +25,91 @@ public class Story extends BaseTimeEntity {
     @Column(name = "story_id")
     private Long id;
 
-    // [메타데이터 그룹]
-    @Column(name = "project_name")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     private String projectName;
-
-    @Column(length = 50)
     private String version;
-
-    @Column(length = 50)
     private String modelType;
-
     private Integer totalSegments;
-
-    // [스토리 정보 그룹]
     private String title;
-
-    @Column(length = 100)
     private String theme;
-
-    @Column(length = 100)
     private String vibe;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
     private String originalPrompt;
 
-    @Column(length = 50)
     private String targetAge;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
     private String summary;
 
-    // [JSON 데이터 그룹]
-//    @Convert(converter = KeywordsConverter.class)
-//    @Column(columnDefinition = "json")
-//    private List<String> keywords;
-//
-//    @Convert(converter = ScriptConverter.class)
-//    @Column(columnDefinition = "json")
-//    private List<ScriptItem> script;
-
-    // [본문 및 미디어]
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
-    @Column(length = 500)
-    private String thumbnailUrl;
+    @Enumerated(EnumType.STRING)
+    private GenerationStatus generationStatus; // From feat/#44
 
-    // [상태 및 로그]
     @Column(length = 50)
     private String verificationStatus;
 
+    @Column(length = 500)
+    private String thumbnailUrl;
+    
     private LocalDateTime completedAt;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "json")
+    private List<String> keywords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Script> scripts = new ArrayList<>();
+
+    @Builder
+    public Story(Member member, String projectName, String version, String modelType, Integer totalSegments, String title, String theme, String vibe, String originalPrompt, String targetAge, String summary, String content, GenerationStatus generationStatus, String thumbnailUrl, LocalDateTime completedAt, List<String> keywords) {
+        this.member = member;
+        this.projectName = projectName;
+        this.version = version;
+        this.modelType = modelType;
+        this.totalSegments = totalSegments;
+        this.title = title;
+        this.theme = theme;
+        this.vibe = vibe;
+        this.originalPrompt = originalPrompt;
+        this.targetAge = targetAge;
+        this.summary = summary;
+        this.content = content;
+        this.generationStatus = generationStatus;
+        this.thumbnailUrl = thumbnailUrl;
+        this.completedAt = completedAt;
+        this.keywords = keywords;
+    }
+
+    public void updateWithAiResponse(String content, String summary, List<String> keywords, String projectName, String version, String modelType, Integer totalSegments) {
+        this.content = content;
+        this.summary = summary;
+        this.keywords = keywords;
+        this.projectName = projectName;
+        this.version = version;
+        this.modelType = modelType;
+        this.totalSegments = totalSegments;
+    }
+
+    public void completeGeneration() {
+        this.generationStatus = GenerationStatus.COMPLETED;
+    }
+
+    public void failGeneration() {
+        this.generationStatus = GenerationStatus.FAILED;
+    }
+
+    public void updateThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public void updateCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
 }

@@ -3,6 +3,9 @@ package pproject.once_upon_a_time.domain.character.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
+import pproject.once_upon_a_time.global.common.StringListConverter;
+
+import java.util.List;
 
 @Getter
 @Builder
@@ -27,33 +30,22 @@ public class Character extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Integer displayOrder;
-
-    private Boolean isActive;
-
-    private Boolean isPremium;
-
     @Column(length = 500)
     private String thumbnailUrl;
-
-    @Column(length = 500)
-    private String voiceFileUrl;
 
     @Column(nullable = false, length = 500)
     private String voiceSampleUrl;
 
-    @Column(name = "voice_actor", length = 100)
+    @Column(length = 100)
     private String voiceActor;
 
-    // 태그(JSON)
-    @Column(columnDefinition = "JSON")
-    private String tags;     // ex: ["애니메이션", "여자아이"]
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "json")
+    private List<String> tags; // Using List<String> from feat/#44
 
-    // GPT-SoVITS 모델 경로
-    @Column(name = "model_path", length = 500)
+    @Column(length = 500)
     private String modelPath;
 
-    // AIHub Speaker ID
-    @Column(name = "speaker_id", length = 50)
+    @Column(length = 50)
     private String speakerId;
 }
