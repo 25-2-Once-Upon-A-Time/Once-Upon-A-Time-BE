@@ -1,7 +1,7 @@
 package pproject.once_upon_a_time.global.auth.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.global.auth.dto.request.SignupRequestDto;
@@ -20,6 +20,9 @@ public class AuthController {
     private final KakaoAuthService kakaoAuthService;
     private final AuthService authService;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     @GetMapping("/kakao/url")
     public ResponseEntity<ApiResult<KakaoRedirectUrlResponseDto>> getKakaoLoginUrl() {
         String url = kakaoAuthService.getKakaoLoginUrl();
@@ -27,11 +30,25 @@ public class AuthController {
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
-    @GetMapping(value = "/kakao/callback", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResult<KakaoLoginResponseDto>> kakaoLogin(@RequestParam("code") String code) {
+    @GetMapping("/kakao/callback")
+    public ResponseEntity<Void> kakaoLogin(@RequestParam("code") String code) {
         KakaoLoginResponseDto responseDto = authService.kakaoLogin(code);
-        return ResponseEntity.ok(ApiResult.ok(responseDto));
+
+        String redirectUrl;
+        if (responseDto.getIsNewUser()) {
+            redirectUrl = frontendUrl
+                + "/info-setup?signupToken="
+                + responseDto.getSignupToken();
+        } else {
+            redirectUrl = frontendUrl + "/story";
+        }
+
+        return ResponseEntity
+            .status(302)
+            .header("Location", redirectUrl)
+            .build();
     }
+
 
     @PostMapping("/signup/kakao")
     public ResponseEntity<ApiResult<TokenResponseDto>> signup(
@@ -42,7 +59,7 @@ public class AuthController {
         TokenResponseDto responseDto = authService.signup(signupToken, requestDto);
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
-    
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResult<Void>> logout(@RequestHeader("Authorization") String accessToken) {
         authService.logout(accessToken);
