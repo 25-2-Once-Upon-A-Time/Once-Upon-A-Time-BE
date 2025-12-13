@@ -56,7 +56,16 @@ public class AudioBookController {
 
         @Schema(description = "응답 데이터")
         public AudioBookResponseDto data = new AudioBookResponseDto(
-                java.util.List.of(new AudioBookResponseDto.Item(1L, "동화 제목"))
+                java.util.List.of(new AudioBookResponseDto.Item(
+                        1L,
+                        "동화 제목",
+                        "동화 제목",
+                        "테마",
+                        "분위기",
+                        "https://example.com/thumbnail.jpg",
+                        "캐릭터 이름",
+                        600
+                ))
         );
 
         @Schema(description = "에러 정보(성공 시 null)")

@@ -38,13 +38,13 @@ public class PlaybackController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "재생 정보 조회",
-            description = "DB 재생 정보를 조회하고 Redis 값이 있으면 우선 적용해 반환합니다.",
+            description = "DB 재생 정보를 조회하고 Redis 값이 있으면 우선 적용해 반환합니다. 동화/캐릭터 메타정보(제목, 테마, 분위기, 썸네일, 주인공 이름) 포함.",
             security = @SecurityRequirement(name = "JWT TOKEN")
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PlaybackInfoResponse.class))),
-            @ApiResponse(responseCode = "404", description = "재생 정보 없음"),
+            @ApiResponse(responseCode = "404", description = "재생 정보 없음 / 오디오북 또는 관련 동화/캐릭터 없음"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     public ResponseEntity<ApiResult<PlaybackInfoResponse>> getPlayback(

@@ -28,4 +28,22 @@ public class PlaybackInfoResponse {
 
     @Schema(description = "재생 상태", example = "PLAYING")
     private PlaybackStatus status;
+
+    @Schema(description = "오디오북 길이(초)", example = "600")
+    private Integer duration;
+
+    @Schema(description = "동화 제목", example = "숲속의 용감한 토끼")
+    private String storyTitle;
+
+    @Schema(description = "동화 테마", example = "용기")
+    private String theme;
+
+    @Schema(description = "동화 분위기", example = "따뜻하고 서정적")
+    private String vibe;
+
+    @Schema(description = "썸네일 URL", example = "https://example.com/thumbnail.jpg")
+    private String thumbnailUrl;
+
+    @Schema(description = "캐릭터 이름", example = "루비")
+    private String characterName;
 }
