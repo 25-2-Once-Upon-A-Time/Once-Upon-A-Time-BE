@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -14,23 +15,33 @@ import java.util.List;
 @Converter
 public class StringListConverter implements AttributeConverter<List<String>, String> {
 
+    private static final Logger log = LoggerFactory.getLogger(StringListConverter.class);
+
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @SneakyThrows
     @Override
     public String convertToDatabaseColumn(List<String> attribute) {
         if (attribute == null || attribute.isEmpty()) {
             return null;
         }
-        return mapper.writeValueAsString(attribute);
+        try {
+            return mapper.writeValueAsString(attribute);
+        } catch (Exception e) {
+            log.warn("List<String> to JSON 변환 실패, null 반환. attribute={}", attribute, e);
+            return null;
+        }
     }
 
-    @SneakyThrows
     @Override
     public List<String> convertToEntityAttribute(String dbData) {
         if (dbData == null || dbData.isBlank()) {
             return List.of();
         }
-        return mapper.readValue(dbData, new TypeReference<>() {});
+        try {
+            return mapper.readValue(dbData, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.warn("JSON to List<String> 파싱 실패, 빈 리스트 반환. raw={}", dbData, e);
+            return List.of();
+        }
     }
 }

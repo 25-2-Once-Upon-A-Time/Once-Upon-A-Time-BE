@@ -13,10 +13,17 @@ public interface AudioBookRepository extends JpaRepository<AudioBook, Long> {
     @Query("""
             select new pproject.once_upon_a_time.domain.audiobook.dto.AudioBookResponseDto$Item(
                 a.id,
-                s.title
+                s.title,
+                s.title,
+                s.theme,
+                s.vibe,
+                s.thumbnailUrl,
+                c.characterName,
+                a.duration
             )
             from AudioBook a
             join a.story s
+            join a.character c
             join a.member m
             where m.id = :memberId
             """)

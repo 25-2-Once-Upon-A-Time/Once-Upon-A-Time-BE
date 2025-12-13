@@ -58,6 +58,8 @@ public enum ErrorCode {
     STORY_NOT_FOUND(404_005, HttpStatus.NOT_FOUND, "동화를 찾을 수 없습니다."),
     AUDIOBOOK_NOT_FOUND(404_006, HttpStatus.NOT_FOUND, "오디오북을 찾을 수 없습니다."),
     PLAYBACK_NOT_FOUND(404_007, HttpStatus.NOT_FOUND, "재생 정보를 찾을 수 없습니다."),
+    AUDIOBOOK_STORY_NOT_FOUND(404_008, HttpStatus.NOT_FOUND, "해당 오디오북에 연결된 동화를 찾을 수 없습니다."),
+    AUDIOBOOK_CHARACTER_NOT_FOUND(404_009, HttpStatus.NOT_FOUND, "해당 오디오북에 연결된 캐릭터를 찾을 수 없습니다."),
 
 
     // ========================

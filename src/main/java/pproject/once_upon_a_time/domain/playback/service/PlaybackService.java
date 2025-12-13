@@ -11,11 +11,13 @@ import pproject.once_upon_a_time.domain.audiobook.dto.PlaybackInfoResponse;
 import pproject.once_upon_a_time.domain.audiobook.dto.PlaybackProgressRequest;
 import pproject.once_upon_a_time.domain.audiobook.dto.PlaybackStartResponse;
 import pproject.once_upon_a_time.domain.audiobook.repository.AudioBookRepository;
+import pproject.once_upon_a_time.domain.character.domain.Character;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.playback.domain.AudioBookPlayback;
 import pproject.once_upon_a_time.domain.playback.domain.PlaybackStatus;
 import pproject.once_upon_a_time.domain.playback.infrastructure.PlaybackRedisRepository;
 import pproject.once_upon_a_time.domain.playback.repository.AudioBookPlaybackRepository;
+import pproject.once_upon_a_time.domain.story.domain.Story;
 import pproject.once_upon_a_time.global.exception.CustomException;
 import pproject.once_upon_a_time.global.exception.ErrorCode;
 
@@ -42,6 +44,16 @@ public class PlaybackService {
         AudioBookPlayback playback = playbackRepository.findByAudioBook_IdAndMemberId_Id(audiobookId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PLAYBACK_NOT_FOUND));
 
+        Story story = audioBook.getStory();
+        if (story == null) {
+            throw new CustomException(ErrorCode.AUDIOBOOK_STORY_NOT_FOUND);
+        }
+
+        Character character = audioBook.getCharacter();
+        if (character == null) {
+            throw new CustomException(ErrorCode.AUDIOBOOK_CHARACTER_NOT_FOUND);
+        }
+
         Integer lastPosition = playback.getLastPosition();
         PlaybackStatus status = playback.getStatus();
 
@@ -65,9 +77,15 @@ public class PlaybackService {
         return PlaybackInfoResponse.builder()
                 .playbackId(playback.getId())
                 .audiobookId(audiobookId)
+                .duration(audioBook.getDuration())
                 .lastPosition(lastPosition)
                 .progressRate(progressRate)
                 .status(status)
+                .storyTitle(story.getTitle())
+                .theme(story.getTheme())
+                .vibe(story.getVibe())
+                .thumbnailUrl(story.getThumbnailUrl())
+                .characterName(character.getCharacterName())
                 .build();
     }
 
