@@ -55,3 +55,6 @@ spring:
 kakao:
   client-id: ${KAKAO_CLIENT_ID}
   redirect-uri: ${KAKAO_REDIRECT_URI}
+
+frontend:
+  url: ${FRONTEND_URL}
