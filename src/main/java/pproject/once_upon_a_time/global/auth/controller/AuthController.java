@@ -1,7 +1,6 @@
 package pproject.once_upon_a_time.global.auth.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.global.auth.dto.request.SignupRequestDto;
@@ -20,9 +19,6 @@ public class AuthController {
     private final KakaoAuthService kakaoAuthService;
     private final AuthService authService;
 
-    @Value("${frontend.url}")
-    private String frontendUrl;
-
     @GetMapping("/kakao/url")
     public ResponseEntity<ApiResult<KakaoRedirectUrlResponseDto>> getKakaoLoginUrl() {
         String url = kakaoAuthService.getKakaoLoginUrl();
@@ -31,22 +27,9 @@ public class AuthController {
     }
 
     @GetMapping("/kakao/callback")
-    public ResponseEntity<Void> kakaoLogin(@RequestParam("code") String code) {
+    public ResponseEntity<ApiResult<KakaoLoginResponseDto>> kakaoLogin(@RequestParam("code") String code) {
         KakaoLoginResponseDto responseDto = authService.kakaoLogin(code);
-
-        String redirectUrl;
-        if (responseDto.getIsNewUser()) {
-            redirectUrl = frontendUrl
-                + "/info-setup?signupToken="
-                + responseDto.getSignupToken();
-        } else {
-            redirectUrl = frontendUrl + "/story";
-        }
-
-        return ResponseEntity
-            .status(302)
-            .header("Location", redirectUrl)
-            .build();
+        return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
 
