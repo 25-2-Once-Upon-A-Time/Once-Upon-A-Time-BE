@@ -20,7 +20,7 @@ public class CharacterService {
 
     private final CharacterRepository characterRepository;
 
-    public List<CharacterListResponseDto> findAllCharacters(String keyword) {
+    public List<CharacterListResponseDto> getCharacterList(String keyword) {
         List<Character> characters;
         if (keyword == null || keyword.isBlank()) {
             characters = characterRepository.findAll();
@@ -32,7 +32,7 @@ public class CharacterService {
                 .collect(Collectors.toList());
     }
 
-    public CharacterDetailResponseDto findCharacterById(Long characterId) {
+    public CharacterDetailResponseDto getCharacterDetail(Long characterId) {
         Character character = characterRepository.findById(characterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHARACTER_NOT_FOUND));
         return new CharacterDetailResponseDto(character);

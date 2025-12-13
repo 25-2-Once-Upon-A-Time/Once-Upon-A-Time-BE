@@ -3,6 +3,8 @@ package pproject.once_upon_a_time.domain.character.dto;
 import lombok.Getter;
 import pproject.once_upon_a_time.domain.character.domain.Character;
 
+import java.util.List;
+
 @Getter
 public class CharacterDetailResponseDto {
 
@@ -11,6 +13,9 @@ public class CharacterDetailResponseDto {
     private final String characterType;
     private final String description;
     private final String thumbnailUrl;
+    private final String voiceSampleUrl;
+    private final String voiceActor;
+    private final List<String> tags;
 
     public CharacterDetailResponseDto(Character character) {
         this.id = character.getId();
@@ -18,5 +23,8 @@ public class CharacterDetailResponseDto {
         this.characterType = character.getCharacterType();
         this.description = character.getDescription();
         this.thumbnailUrl = character.getThumbnailUrl();
+        this.voiceSampleUrl = character.getVoiceSampleUrl();
+        this.voiceActor = character.getVoiceActor();
+        this.tags = character.getTags();
     }
 }
