@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.domain.story.dto.StoryCreateResponseDto;
+import pproject.once_upon_a_time.domain.story.dto.StoryDetailResponseDto;
+import pproject.once_upon_a_time.domain.story.dto.StoryListResponseDto;
 import pproject.once_upon_a_time.domain.story.dto.UserRequestDto;
 import pproject.once_upon_a_time.domain.story.service.StoryService;
+import pproject.once_upon_a_time.global.response.ApiResult;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/stories")
@@ -29,5 +30,17 @@ public class StoryController {
         Long memberId = Long.parseLong(userDetails.getUsername());
         StoryCreateResponseDto responseDto = storyService.createStory(memberId, request);
         return ResponseEntity.created(URI.create("/api/v1/stories/" + responseDto.getStoryId())).body(responseDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResult<List<StoryListResponseDto>>> getStoryList(
+            @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(ApiResult.ok(storyService.getStoryList(keyword)));
+    }
+
+    @GetMapping("/{storyId}")
+    public ResponseEntity<ApiResult<StoryDetailResponseDto>> getStoryDetail(
+            @PathVariable Long storyId) {
+        return ResponseEntity.ok(ApiResult.ok(storyService.getStoryDetail(storyId)));
     }
 }

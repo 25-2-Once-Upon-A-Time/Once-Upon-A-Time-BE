@@ -20,14 +20,12 @@ public class CharacterController {
     @GetMapping
     public ResponseEntity<ApiResult<List<CharacterListResponseDto>>> getCharacterList(
             @RequestParam(required = false) String keyword) {
-
-        return ResponseEntity.ok(ApiResult.ok(characterService.findAllCharacters(keyword)));
+        return ResponseEntity.ok(ApiResult.ok(characterService.getCharacterList(keyword)));
     }
 
     @GetMapping("/{characterId}")
     public ResponseEntity<ApiResult<CharacterDetailResponseDto>> getCharacterDetail(
             @PathVariable Long characterId) {
-
-        return ResponseEntity.ok(ApiResult.ok(characterService.findCharacterById(characterId)));
+        return ResponseEntity.ok(ApiResult.ok(characterService.getCharacterDetail(characterId)));
     }
 }
