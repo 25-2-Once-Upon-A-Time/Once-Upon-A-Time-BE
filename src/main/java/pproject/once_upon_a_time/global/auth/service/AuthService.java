@@ -97,29 +97,30 @@ public class AuthService {
         return createAndSaveToken(savedMember);
     }
 
-    // [추가] 토큰 재발급 (Reissue) - RTR 방식 적용
+    // [최종] 토큰 재발급 (리프레시 토큰 고정)
     @Transactional
     public TokenResponseDto reissue(TokenReissueRequestDto request) {
-        // 1. Refresh Token 유효성 검사
+        // 1. 유효성 검사
         if (!jwtProvider.validateToken(request.getRefreshToken())) {
-            throw new CustomException(ErrorCode.TOKEN_INVALID); // "유효하지 않은 리프레시 토큰입니다."
+            throw new CustomException(ErrorCode.TOKEN_INVALID);
         }
 
-        // 2. DB에서 토큰 찾기
+        // 2. DB 조회
         RefreshToken refreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
-            .orElseThrow(() -> new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND)); // "리프레시 토큰을 찾을 수 없습니다."
+            .orElseThrow(() -> new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
-        // 3. 토큰의 주인(Member) 찾기
+        // 3. 멤버 조회
         Member member = memberRepository.findById(refreshToken.getMember().getId())
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 4. 새 토큰 발급 (Access & Refresh 둘 다 교체)
-        TokenResponseDto newTokens = jwtProvider.createToken(member);
+        // 4. Access Token만 새로 생성 (이제 이 메서드가 존재함!)
+        String newAccessToken = jwtProvider.createAccessToken(member.getId(), member.getRole());
 
-        // 5. DB 업데이트 (기존 토큰을 새 리프레시 토큰으로 교체)
-        refreshToken.updateToken(newTokens.getRefreshToken());
-
-        return newTokens;
+        // 5. 결과 반환 (기존 Refresh Token 유지)
+        return TokenResponseDto.builder()
+            .accessToken(newAccessToken)
+            .refreshToken(refreshToken.getToken())
+            .build();
     }
 
     @Transactional

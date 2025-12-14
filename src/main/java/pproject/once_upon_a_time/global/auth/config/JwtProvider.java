@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import pproject.once_upon_a_time.global.auth.dto.response.TokenResponseDto;
 import pproject.once_upon_a_time.domain.member.domain.Member;
+import pproject.once_upon_a_time.global.common.MemberRole; // Role Enum import 확인
 
 import java.security.Key;
 import java.util.Arrays;
@@ -41,51 +42,64 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
+    // [추가] Access Token 만료 시간 조회 (AuthService에서 사용)
+    public Long getAccessTokenExpirationTime() {
+        return ACCESS_TOKEN_EXPIRE_TIME;
+    }
+
     public String createSignupToken(String kakaoUserId) {
         Claims claims = Jwts.claims().setSubject(kakaoUserId);
         claims.put("type", "signup");
 
         Date now = new Date();
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + SIGNUP_TOKEN_EXPIRE_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setClaims(claims)
+            .setIssuedAt(now)
+            .setExpiration(new Date(now.getTime() + SIGNUP_TOKEN_EXPIRE_TIME))
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public String getKakaoUserIdFromSignupToken(String token) {
         try {
             Claims claims = parseClaims(token);
             if (!"signup".equals(claims.get("type"))) {
-                return null; // Or throw an exception
+                return null;
             }
             return claims.getSubject();
         } catch (Exception e) {
-            // ExpiredJwtException, MalformedJwtException etc.
             return null;
         }
     }
 
+    // [수정] DTO 변경에 맞춰 Builder 패턴으로 변경
     public TokenResponseDto createToken(Member member) {
-        Claims claims = Jwts.claims().setSubject(member.getId().toString());
-        claims.put("role", member.getRole().toString());
+        String accessToken = createAccessToken(member.getId(), member.getRole());
 
         Date now = new Date();
-
-        String accessToken = Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_TIME))
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
 
-        return new TokenResponseDto(accessToken, refreshToken);
+        return TokenResponseDto.builder()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .build();
+    }
+
+    // [추가] Access Token만 따로 만드는 메서드 (재발급용)
+    public String createAccessToken(Long memberId, MemberRole role) {
+        Claims claims = Jwts.claims().setSubject(memberId.toString());
+        claims.put("role", role.toString());
+
+        Date now = new Date();
+        return Jwts.builder()
+            .setClaims(claims)
+            .setIssuedAt(now)
+            .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME))
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public Authentication getAuthentication(String accessToken) {
@@ -96,9 +110,9 @@ public class JwtProvider {
         }
 
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("role").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+            Arrays.stream(claims.get("role").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
         UserDetails principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
@@ -109,7 +123,6 @@ public class JwtProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            // MalformedJwtException | ExpiredJwtException | etc...
             return false;
         }
     }
