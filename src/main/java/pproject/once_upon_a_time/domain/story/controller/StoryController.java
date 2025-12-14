@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import pproject.once_upon_a_time.domain.story.dto.StoryCreateResponseDto;
 import pproject.once_upon_a_time.domain.story.dto.StoryDetailResponseDto;
 import pproject.once_upon_a_time.domain.story.dto.StoryListResponseDto;
 import pproject.once_upon_a_time.domain.story.dto.UserRequestDto;
@@ -23,15 +22,14 @@ public class StoryController {
     private final StoryService storyService;
 
     @PostMapping
-    public ResponseEntity<StoryCreateResponseDto> createStory(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody UserRequestDto request
+    public ResponseEntity<StoryDetailResponseDto> createStory(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody UserRequestDto request
     ) {
         Long memberId = Long.parseLong(userDetails.getUsername());
-        StoryCreateResponseDto responseDto = storyService.createStory(memberId, request);
-        return ResponseEntity.created(URI.create("/api/v1/stories/" + responseDto.getStoryId())).body(responseDto);
+        StoryDetailResponseDto responseDto = storyService.createStory(memberId, request);
+        return ResponseEntity.created(URI.create("/api/v1/stories/" + responseDto.getId())).body(responseDto);
     }
-
     @GetMapping
     public ResponseEntity<ApiResult<List<StoryListResponseDto>>> getStoryList(
             @RequestParam(required = false) String keyword) {

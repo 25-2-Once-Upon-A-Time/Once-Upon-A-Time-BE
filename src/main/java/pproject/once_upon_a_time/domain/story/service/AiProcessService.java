@@ -1,5 +1,6 @@
 package pproject.once_upon_a_time.domain.story.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,56 +28,67 @@ public class AiProcessService {
 
     public AiGenerationResponse generateStory(UserRequestDto request) {
         Process process = null;
-        StringBuilder fullOutput = new StringBuilder(); // 파이썬의 모든 출력을 담을 그릇
+        StringBuilder fullOutput = new StringBuilder();
 
         try {
             log.info("Running Python AI: {} {}", pythonPath, scriptPath);
 
-            // 1. 프로세스 빌더 설정
+            // 1. 프로세스 빌더 설정 (stderr -> stdout 병합)
             ProcessBuilder pb = new ProcessBuilder(pythonPath, scriptPath);
-
-            // [중요] stderr(에러)도 stdout(표준출력)으로 합칩니다.
-            // 파이썬이 print() 하든 error() 하든 한 곳으로 받아서 처리하기 위함입니다.
             pb.redirectErrorStream(true);
-
             process = pb.start();
 
-            // 2. 입력 데이터 전송 (Java -> Python Stdin)
+            // 2. 입력 데이터 전송
             try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8))) {
                 String inputJson = objectMapper.writeValueAsString(request);
                 writer.write(inputJson);
                 writer.flush();
-                // 입력 끝났음을 명시 (파이썬의 read()가 종료되도록)
-                writer.close();
             }
 
-            // 3. 출력 읽기 (Python -> Java) + 실시간 로그 출력
+            // 3. 출력 읽기 (실시간 로그 출력 + 저장)
             try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // [핵심 1] 파이썬이 뱉는 족족 자바 콘솔에 찍어줍니다.
-                    // (JSON 데이터는 너무 길 수 있으므로, 로그에서는 간단히 처리할 수도 있습니다)
+                    // 파이썬 로그는 실시간으로 보면서 답답함 해소
                     log.info("[Python Log] {}", line);
-
-                    // 나중에 JSON 파싱을 위해 저장해둡니다.
                     fullOutput.append(line).append("\n");
                 }
             }
 
-            // 4. 프로세스 종료 대기 (타임아웃 2분)
+            // 4. 종료 대기
             if (!process.waitFor(120, TimeUnit.SECONDS)) {
                 process.destroy();
                 throw new RuntimeException("AI processing timed out");
             }
 
-            // 5. 결과 문자열에서 JSON 추출 (핵심 로직)
-            String rawOutput = fullOutput.toString();
-            String jsonResult = extractJsonFromOutput(rawOutput);
+            // =========================================================
+            // [핵심 변경] Wrapper(포장지) 대응 로직
+            // =========================================================
 
-            // 6. JSON -> DTO 변환
-            return objectMapper.readValue(jsonResult, AiGenerationResponse.class);
+            // 5-1. 전체 출력에서 JSON 문자열 발굴 (기준: "success")
+            String rawOutput = fullOutput.toString();
+            String jsonWrapperString = extractJsonWrapper(rawOutput);
+
+            // 5-2. JsonNode로 파싱 (구조를 모르니 일단 트리로 받음)
+            JsonNode rootNode = objectMapper.readTree(jsonWrapperString);
+
+            // 5-3. success 여부 확인
+            boolean success = rootNode.path("success").asBoolean(false);
+            if (!success) {
+                String errorMsg = rootNode.path("error").asText("Unknown error");
+                throw new RuntimeException("Python script returned failure: " + errorMsg);
+            }
+
+            // 5-4. "data" 필드 꺼내기 (여기가 진짜 알맹이)
+            JsonNode dataNode = rootNode.get("data");
+            if (dataNode == null || dataNode.isNull()) {
+                throw new RuntimeException("Python script returned success but 'data' is null");
+            }
+
+            // 6. 알맹이(data)를 DTO로 변환
+            return objectMapper.treeToValue(dataNode, AiGenerationResponse.class);
 
         } catch (Exception e) {
             log.error("Failed to run python script or parse result", e);
@@ -89,34 +101,46 @@ public class AiProcessService {
     }
 
     /**
-     * [핵심 2] 파이썬의 잡다한 로그들 사이에서 진짜 JSON 객체 문자열만 찾아내는 메서드
+     * 로그와 JSON이 뒤섞인 문자열에서 Wrapper JSON({ "success": ... })을 찾아냅니다.
      */
-    private String extractJsonFromOutput(String output) {
+    private String extractJsonWrapper(String output) {
         if (output == null || output.isBlank()) {
             throw new RuntimeException("Python script returned empty output.");
         }
 
-        // 전략: 우리 JSON에는 반드시 "metadata" 라는 키가 있습니다.
-        // 이를 기준점(Anchor)으로 삼아 앞뒤 중괄호 {}를 찾습니다.
+        // 전략: Wrapper JSON은 무조건 "success"라는 키를 가지고 있습니다.
+        // "success"를 찾고, 그 앞의 가장 가까운 '{'를 찾습니다.
+        int anchorIndex = output.lastIndexOf("\"success\"");
 
-        int metadataIndex = output.lastIndexOf("\"metadata\"");
-        if (metadataIndex == -1) {
-            log.error("Full Output:\n{}", output);
-            throw new RuntimeException("Could not find 'metadata' key in output. AI generation might have failed.");
+        if (anchorIndex == -1) {
+            // 혹시 success가 없을 수도 있으니, 기존 방식대로 metadata로 시도하거나 에러 처리
+            log.warn("'success' key not found, trying fallback extraction...");
+            return extractJsonFallback(output);
         }
 
-        // "metadata" 앞에 있는 가장 가까운 '{' (JSON 시작점)
-        int jsonStartIndex = output.lastIndexOf("{", metadataIndex);
+        // "success" 앞의 '{' 찾기 (JSON 시작)
+        int jsonStartIndex = output.lastIndexOf("{", anchorIndex);
 
-        // 전체 문자열의 맨 뒤에서부터 '}' (JSON 끝점)
-        // (주의: JSON 출력 뒤에 로그가 더 있어도, 마지막 '}'가 JSON의 끝이라고 가정합니다)
+        // 전체의 마지막 '}' 찾기 (JSON 끝)
         int jsonEndIndex = output.lastIndexOf("}");
 
         if (jsonStartIndex == -1 || jsonEndIndex == -1 || jsonStartIndex >= jsonEndIndex) {
-            throw new RuntimeException("Failed to locate valid JSON brackets in output.");
+            log.error("Full Output:\n{}", output);
+            throw new RuntimeException("Failed to locate valid JSON wrapper in output.");
         }
 
-        // 깔끔하게 JSON만 잘라내서 반환
+        return output.substring(jsonStartIndex, jsonEndIndex + 1);
+    }
+
+    // 만약 파이썬 팀원이 갑자기 맘 바꿔서 포장지를 없앨 경우를 대비한 보험
+    private String extractJsonFallback(String output) {
+        int metadataIndex = output.lastIndexOf("\"metadata\"");
+        if (metadataIndex == -1) {
+            log.error("Full Output:\n{}", output);
+            throw new RuntimeException("Neither 'success' nor 'metadata' found in output.");
+        }
+        int jsonStartIndex = output.lastIndexOf("{", metadataIndex);
+        int jsonEndIndex = output.lastIndexOf("}");
         return output.substring(jsonStartIndex, jsonEndIndex + 1);
     }
 }

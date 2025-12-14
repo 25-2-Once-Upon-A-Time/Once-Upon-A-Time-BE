@@ -40,8 +40,8 @@ public class Character extends BaseTimeEntity {
     private String voiceActor;
 
     @Convert(converter = StringListConverter.class)
-    @Column(columnDefinition = "json")
-    private List<String> tags; // Using List<String> from feat/#44
+    @Column(columnDefinition = "TEXT")
+    private List<String> tags;
 
     @Column(length = 500)
     private String modelPath;

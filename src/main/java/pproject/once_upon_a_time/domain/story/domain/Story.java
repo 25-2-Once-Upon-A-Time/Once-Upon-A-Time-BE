@@ -29,10 +29,14 @@ public class Story extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String projectName;
+    // [삭제됨] projectName (고정값이므로 삭제)
+
+    // [유지] 모델 버전 관리를 위해 남겨둠 (필요 없으면 삭제 가능)
     private String version;
     private String modelType;
     private Integer totalSegments;
+
+    // --- 사용자 요청 정보 ---
     private String title;
     private String theme;
     private String vibe;
@@ -40,6 +44,7 @@ public class Story extends BaseTimeEntity {
     @Lob
     private String originalPrompt;
 
+    // --- AI 생성 정보 ---
     private String targetAge;
 
     @Lob
@@ -50,27 +55,30 @@ public class Story extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private GenerationStatus generationStatus; // From feat/#44
+    private GenerationStatus generationStatus;
 
-    @Column(length = 50)
-    private String verificationStatus;
+    // [삭제됨] verificationStatus (generationStatus로 충분함)
 
     @Column(length = 500)
     private String thumbnailUrl;
-    
+
     private LocalDateTime completedAt;
 
+    // [수정] json 타입 강제 제거 -> 호환성 확보
     @Convert(converter = StringListConverter.class)
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "TEXT")
     private List<String> keywords = new ArrayList<>();
 
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Script> scripts = new ArrayList<>();
 
     @Builder
-    public Story(Member member, String projectName, String version, String modelType, Integer totalSegments, String title, String theme, String vibe, String originalPrompt, String targetAge, String summary, String content, GenerationStatus generationStatus, String thumbnailUrl, LocalDateTime completedAt, List<String> keywords) {
+    public Story(Member member, String version, String modelType, Integer totalSegments,
+        String title, String theme, String vibe, String originalPrompt,
+        String targetAge, String summary, String content,
+        GenerationStatus generationStatus, String thumbnailUrl,
+        LocalDateTime completedAt, List<String> keywords) {
         this.member = member;
-        this.projectName = projectName;
         this.version = version;
         this.modelType = modelType;
         this.totalSegments = totalSegments;
@@ -87,11 +95,12 @@ public class Story extends BaseTimeEntity {
         this.keywords = keywords;
     }
 
-    public void updateWithAiResponse(String content, String summary, List<String> keywords, String projectName, String version, String modelType, Integer totalSegments) {
+    // 메서드 파라미터에서도 projectName 제거
+    public void updateWithAiResponse(String content, String summary, List<String> keywords,
+        String version, String modelType, Integer totalSegments) {
         this.content = content;
         this.summary = summary;
         this.keywords = keywords;
-        this.projectName = projectName;
         this.version = version;
         this.modelType = modelType;
         this.totalSegments = totalSegments;
@@ -99,6 +108,7 @@ public class Story extends BaseTimeEntity {
 
     public void completeGeneration() {
         this.generationStatus = GenerationStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now(); // 완료 시간 자동 기록 추천
     }
 
     public void failGeneration() {
@@ -107,9 +117,5 @@ public class Story extends BaseTimeEntity {
 
     public void updateThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
-    }
-
-    public void updateCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
     }
 }
