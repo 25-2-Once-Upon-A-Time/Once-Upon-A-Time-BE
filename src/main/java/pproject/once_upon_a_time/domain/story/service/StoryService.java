@@ -7,10 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.member.repository.MemberRepository;
 import pproject.once_upon_a_time.domain.story.domain.Story;
-import pproject.once_upon_a_time.domain.story.dto.StoryCreateResponseDto;
-import pproject.once_upon_a_time.domain.story.dto.StoryDetailResponseDto;
-import pproject.once_upon_a_time.domain.story.dto.StoryListResponseDto;
-import pproject.once_upon_a_time.domain.story.dto.UserRequestDto;
+import pproject.once_upon_a_time.domain.story.dto.*; // AiGenerationResponse 포함
 import pproject.once_upon_a_time.domain.story.repository.StoryRepository;
 import pproject.once_upon_a_time.global.exception.CustomException;
 import pproject.once_upon_a_time.global.exception.ErrorCode;
@@ -24,22 +21,27 @@ import java.util.stream.Collectors;
 public class StoryService {
 
     private final StoryUpdateService storyUpdateService;
-    private final AiClient aiClient;
+    // [변경] 기존 AiClient 제거 -> AiProcessService 주입
+    private final AiProcessService aiProcessService;
     private final MemberRepository memberRepository;
     private final StoryRepository storyRepository;
 
     public StoryCreateResponseDto createStory(Long memberId, UserRequestDto request) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 1. 초기 저장 (트랜잭션 O)
         Story story = storyUpdateService.initiateStory(request, member);
-        
-        AiResponse aiResponse;
+
+        // [변경] DTO 타입 변경 (AiResponse -> AiGenerationResponse)
+        AiGenerationResponse aiResponse;
         try {
-            // 2. AI 호출 (트랜잭션 X)
-            log.info("Requesting story generation to AI server for storyId: {}", story.getId());
-            aiResponse = aiClient.generateStory(request);
+            // 2. AI 프로세스 실행 (트랜잭션 X)
+            log.info("Requesting story generation to AI Process for storyId: {}", story.getId());
+
+            // [변경] generateStory 호출 대상 변경
+            aiResponse = aiProcessService.generateStory(request);
+
         } catch (Exception e) {
             log.error("AI story generation failed for storyId: {}", story.getId(), e);
             // 실패 상태로 업데이트
@@ -63,14 +65,14 @@ public class StoryService {
             stories = storyRepository.findByTitleContainingIgnoreCase(keyword);
         }
         return stories.stream()
-                .map(StoryListResponseDto::new)
-                .collect(Collectors.toList());
+            .map(StoryListResponseDto::new)
+            .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public StoryDetailResponseDto getStoryDetail(Long storyId) {
         Story story = storyRepository.findById(storyId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORY_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.STORY_NOT_FOUND));
         return new StoryDetailResponseDto(story);
     }
 }
