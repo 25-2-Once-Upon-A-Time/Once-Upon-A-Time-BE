@@ -29,3 +29,7 @@ logging:
 ai:
   python-path: ${AI_PYTHON_PATH}
   script-path: ${AI_SCRIPT_PATH}
+
+python:
+  image-path: content/image_mock.py
+  timeout-seconds: 120

@@ -10,6 +10,7 @@ devdb.lock.db
 devdb.trace.db
 AGENTS.md
 mock_generator.py
+content/**
 
 ### STS ###
 .apt_generated

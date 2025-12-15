@@ -45,6 +45,7 @@ public enum ErrorCode {
     // ========================
     FORBIDDEN(403_000, HttpStatus.FORBIDDEN, "접속 권한이 없습니다."),
     ACCESS_DENY(403_001, HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
+    STORY_OWNER_MISMATCH(403_002, HttpStatus.FORBIDDEN, "동화 소유자가 아닙니다."),
 
 
     // ========================
@@ -67,6 +68,7 @@ public enum ErrorCode {
     // ========================
     DUPLICATE_EMAIL(409_001, HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     ALREADY_WITHDRAWN_USER(409_004, HttpStatus.CONFLICT, "이미 탈퇴한 회원입니다."),
+    STORY_THUMBNAIL_NOT_ALLOWED(409_005, HttpStatus.CONFLICT, "썸네일을 생성할 수 없는 상태입니다."),
 
 
     // ========================
@@ -76,6 +78,9 @@ public enum ErrorCode {
     KAKAO_TOKEN_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 토큰을 가져오는 중 오류가 발생했습니다."),
     KAKAO_USER_INFO_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 사용자 정보를 가져오는 중 오류가 발생했습니다."),
     REDIS_CONNECTION_FAILED(500_003, HttpStatus.INTERNAL_SERVER_ERROR, "Redis 연결에 실패했습니다."),
+    PYTHON_PROCESS_FAILED(500_004, HttpStatus.INTERNAL_SERVER_ERROR, "파이썬 프로세스 처리 중 오류가 발생했습니다."),
+    SUPABASE_UPLOAD_FAILED(502_001, HttpStatus.BAD_GATEWAY, "파일 업로드 중 오류가 발생했습니다."),
+    PYTHON_PROCESS_TIMEOUT(504_001, HttpStatus.GATEWAY_TIMEOUT, "파이썬 프로세스가 제한 시간 내 종료되지 않았습니다."),
 
     ;
 

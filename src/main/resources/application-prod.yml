@@ -24,3 +24,7 @@ server:
 ai:
   python-path: ${AI_PYTHON_PATH}
   script-path: ${AI_SCRIPT_PATH}
+
+python:
+  image-path: /home/t25301/ai/image_generator.py
+  timeout-seconds: 120
