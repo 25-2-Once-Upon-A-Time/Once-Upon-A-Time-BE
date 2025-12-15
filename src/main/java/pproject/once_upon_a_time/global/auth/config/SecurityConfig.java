@@ -37,6 +37,7 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/api/v1/auth/**" // 여기에 reissue 포함됨
                 ).permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
             )

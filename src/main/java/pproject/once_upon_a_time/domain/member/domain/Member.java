@@ -3,6 +3,7 @@ package pproject.once_upon_a_time.domain.member.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
+import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 import pproject.once_upon_a_time.global.common.MemberRole;
 
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "member")
-public class Member {
+public class Member extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
