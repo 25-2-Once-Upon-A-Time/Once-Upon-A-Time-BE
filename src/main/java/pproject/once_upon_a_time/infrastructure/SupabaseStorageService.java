@@ -55,6 +55,19 @@ public class SupabaseStorageService {
         return uploadToBucket(file, bucket);
     }
 
+    /**
+     * PNG 바이트 배열을 지정한 파일명으로 이미지 버킷에 업로드한다.
+     */
+    public String uploadImageBytes(byte[] imageBytes, String fileName) {
+        if (imageBytes == null || imageBytes.length == 0) {
+            throw new IllegalArgumentException("이미지 데이터가 비어 있습니다.");
+        }
+        String objectName = (fileName == null || fileName.isBlank())
+                ? UUID.randomUUID() + ".png"
+                : fileName;
+        return uploadToBucket(imageBytes, imageBucket, MediaType.IMAGE_PNG, objectName);
+    }
+
     private void validateMimeType(MultipartFile file, FileType type) {
         String contentType = file.getContentType();
         if (contentType == null) {
@@ -73,20 +86,22 @@ public class SupabaseStorageService {
 
     private String uploadToBucket(MultipartFile file, String bucket) throws IOException {
         String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+        MediaType mediaType = file.getContentType() != null
+                ? MediaType.parseMediaType(file.getContentType())
+                : MediaType.APPLICATION_OCTET_STREAM;
+        return uploadToBucket(file.getBytes(), bucket, mediaType, fileName);
+    }
 
+    private String uploadToBucket(byte[] data, String bucket, MediaType mediaType, String fileName) {
         // Supabase 업로드 endpoint
         String uploadUrl = supabaseUrl + "/storage/v1/object/" + bucket + "/" + fileName;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", serviceKey);
         headers.set("Authorization", "Bearer " + serviceKey);
-
-        MediaType mediaType = file.getContentType() != null
-                ? MediaType.parseMediaType(file.getContentType())
-                : MediaType.APPLICATION_OCTET_STREAM;
         headers.setContentType(mediaType);
 
-        HttpEntity<byte[]> request = new HttpEntity<>(file.getBytes(), headers);
+        HttpEntity<byte[]> request = new HttpEntity<>(data, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
                 uploadUrl,
