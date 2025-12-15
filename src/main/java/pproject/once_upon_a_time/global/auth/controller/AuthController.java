@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.global.auth.dto.request.SignupRequestDto;
+import pproject.once_upon_a_time.global.auth.dto.request.TokenReissueRequestDto; // [추가]
 import pproject.once_upon_a_time.global.auth.dto.response.KakaoLoginResponseDto;
 import pproject.once_upon_a_time.global.auth.dto.response.KakaoRedirectUrlResponseDto;
 import pproject.once_upon_a_time.global.auth.dto.response.TokenResponseDto;
@@ -32,14 +33,20 @@ public class AuthController {
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
-
     @PostMapping("/signup/kakao")
     public ResponseEntity<ApiResult<TokenResponseDto>> signup(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody SignupRequestDto requestDto
+        @RequestHeader("Authorization") String authorizationHeader,
+        @RequestBody SignupRequestDto requestDto
     ) {
         String signupToken = authorizationHeader.substring(7); // "Bearer " 제거
         TokenResponseDto responseDto = authService.signup(signupToken, requestDto);
+        return ResponseEntity.ok(ApiResult.ok(responseDto));
+    }
+
+    // [추가] 토큰 재발급 API
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResult<TokenResponseDto>> reissue(@RequestBody TokenReissueRequestDto request) {
+        TokenResponseDto responseDto = authService.reissue(request);
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
