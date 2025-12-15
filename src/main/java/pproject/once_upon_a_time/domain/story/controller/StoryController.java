@@ -34,8 +34,9 @@ public class StoryController {
     ) {
         Long memberId = Long.parseLong(userDetails.getUsername());
         StoryDetailResponseDto responseDto = storyService.createStory(memberId, request);
-        return ResponseEntity.created(URI.create("/api/v1/stories/" + responseDto.getId())).body(responseDto);
+        return ResponseEntity.created(URI.create("/api/v1/stories/" + responseDto.getStoryId())).body(responseDto);
     }
+
     @GetMapping
     public ResponseEntity<ApiResult<List<StoryListResponseDto>>> getStoryList(
             @RequestParam(required = false) String keyword) {
