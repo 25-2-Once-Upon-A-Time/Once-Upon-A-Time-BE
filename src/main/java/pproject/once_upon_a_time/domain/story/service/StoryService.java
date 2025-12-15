@@ -25,7 +25,7 @@ public class StoryService {
     private final MemberRepository memberRepository;
     private final StoryRepository storyRepository;
 
-    // [변경] 반환 타입: StoryCreateResponseDto -> StoryDetailResponseDto
+    // [수정] AiGenerationResponse -> AiStoryResponseDto
     public StoryDetailResponseDto createStory(Long memberId, UserRequestDto request) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -33,7 +33,8 @@ public class StoryService {
         // 1. 초기 저장 (상태: PROCESSING, 내용은 비어있음)
         Story story = storyUpdateService.initiateStory(request, member);
 
-        AiGenerationResponse aiResponse;
+        // [수정] AiGenerationResponse -> AiStoryResponseDto
+        AiStoryResponseDto aiResponse;
         try {
             // 2. AI 프로세스 실행 (Python 호출, 시간 소요됨)
             log.info("Requesting story generation to AI Process for storyId: {}", story.getId());
@@ -46,6 +47,8 @@ public class StoryService {
         }
 
         // 3. 최종 업데이트 (DB에 내용 저장 및 상태 COMPLETED로 변경)
+        // [수정] aiResponse를 AiStoryResponseDto로 받으므로, StoryUpdateService의 파라미터도
+        //       AiStoryResponseDto를 받도록 수정해야 합니다. (이 로직은 StoryUpdateService 내에 있다고 가정)
         log.info("Finalizing story for storyId: {}", story.getId());
         storyUpdateService.finalizeStory(story.getId(), aiResponse);
 

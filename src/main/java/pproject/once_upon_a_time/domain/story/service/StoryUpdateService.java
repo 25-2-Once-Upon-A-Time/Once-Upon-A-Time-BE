@@ -8,7 +8,8 @@ import pproject.once_upon_a_time.domain.script.domain.Script;
 import pproject.once_upon_a_time.domain.script.repository.ScriptRepository;
 import pproject.once_upon_a_time.domain.story.domain.GenerationStatus;
 import pproject.once_upon_a_time.domain.story.domain.Story;
-import pproject.once_upon_a_time.domain.story.dto.AiGenerationResponse;
+// import pproject.once_upon_a_time.domain.story.dto.AiGenerationResponse; // 기존 DTO 제거
+import pproject.once_upon_a_time.domain.story.dto.AiStoryResponseDto; // [NEW] 새로운 DTO 임포트
 import pproject.once_upon_a_time.domain.story.dto.UserRequestDto;
 import pproject.once_upon_a_time.domain.story.repository.StoryRepository;
 
@@ -41,40 +42,40 @@ public class StoryUpdateService {
 
     /**
      * [트랜잭션 2] AI 응답을 바탕으로 동화와 스크립트를 DB에 최종 업데이트
+     * 파라미터: AiGenerationResponse -> AiStoryResponseDto로 변경
      */
     @Transactional
-    public void finalizeStory(Long storyId, AiGenerationResponse aiResponse) {
+    public void finalizeStory(Long storyId, AiStoryResponseDto aiResponse) { // [수정] DTO 타입 변경
         Story story = storyRepository.findById(storyId)
             .orElseThrow(() -> new IllegalArgumentException("Story not found"));
 
+        // 새로운 DTO 구조에 맞게 데이터 추출
+        AiStoryResponseDto.AiStoryData data = aiResponse.getData();
+        AiStoryResponseDto.StoryInfo info = data.getStoryInfo();
+        AiStoryResponseDto.ScriptSegment firstScript = data.getScript().get(0); // 예시: 첫 번째 스크립트
+
         // 1. AI 응답으로 Story 정보 업데이트
-        AiGenerationResponse.Metadata meta = aiResponse.metadata();
-        AiGenerationResponse.StoryInfo info = aiResponse.storyInfo();
-
-        // [수정 1] meta.projectName() 제거 (총 6개 인자)
+        // 참고: AiStoryResponseDto는 레코드(Record)가 아닌 일반 클래스이므로 getter를 사용합니다.
         story.updateWithAiResponse(
-            aiResponse.content(),
-            info.summary(),
-            info.keywords(),
-            meta.version(),
-            meta.modelType(),
-            meta.totalSegments()
+            data.getContent(), // [수정] content 필드 사용
+            info.getSummary(), // [수정] info.getSummary() 사용
+            data.getTags(),    // [수정] data.getTags() 사용 (keywords 대신 tags 사용)
+            (String) data.getMetadata().get("version"), // [수정] Map에서 version 추출
+            (String) data.getMetadata().get("model_type"), // [수정] Map에서 model_type 추출
+            (int) data.getMetadata().get("total_segments") // [수정] Map에서 total_segments 추출
         );
-
-        // [수정 2] updateCompletedAt() 제거
-        // -> 아래 completeGeneration() 내부에서 this.completedAt = LocalDateTime.now()가 실행됨
 
         // 2. AI 응답으로 Script 엔티티 리스트 생성 및 저장
         final Story finalStory = story;
 
-        List<Script> scripts = aiResponse.script().stream()
+        List<Script> scripts = data.getScript().stream() // [수정] data.getScript() 사용
             .map(item -> Script.builder()
                 .story(finalStory)
-                .seq(item.seq())
-                .role(item.role())
-                .text(item.text())
-                .emotion(item.emotion()) // [추가] DTO에서 감정 꺼내서 저장
-                .audioFilePath(null)
+                .seq(item.getSeq())
+                .role(item.getRole())
+                .text(item.getText())
+                .emotion(item.getEmotion())
+                .audioFilePath(item.getAudioFileName()) // [수정] audioFileName 사용
                 .build())
             .collect(Collectors.toList());
 

@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pproject.once_upon_a_time.domain.story.dto.AiGenerationResponse;
+// import pproject.once_upon_a_time.domain.story.dto.AiGenerationResponse; // 삭제 또는 수정 필요
+import pproject.once_upon_a_time.domain.story.dto.AiStoryResponseDto; // [NEW] 새로 정의된 DTO 임포트
 import pproject.once_upon_a_time.domain.story.dto.UserRequestDto;
 
 import java.io.*;
@@ -26,7 +27,8 @@ public class AiProcessService {
 
     private final ObjectMapper objectMapper;
 
-    public AiGenerationResponse generateStory(UserRequestDto request) {
+    // [수정] 반환 타입을 새로 정의된 AiStoryResponseDto로 변경
+    public AiStoryResponseDto generateStory(UserRequestDto request) {
         Process process = null;
         StringBuilder fullOutput = new StringBuilder();
 
@@ -81,14 +83,10 @@ public class AiProcessService {
                 throw new RuntimeException("Python script returned failure: " + errorMsg);
             }
 
-            // 5-4. "data" 필드 꺼내기 (여기가 진짜 알맹이)
-            JsonNode dataNode = rootNode.get("data");
-            if (dataNode == null || dataNode.isNull()) {
-                throw new RuntimeException("Python script returned success but 'data' is null");
-            }
-
-            // 6. 알맹이(data)를 DTO로 변환
-            return objectMapper.treeToValue(dataNode, AiGenerationResponse.class);
+            // 6. 알맹이(전체 JSON)를 DTO로 변환
+            // JSON 구조가 { "success": true, "data": {...} } 이므로,
+            // rootNode 전체를 AiStoryResponseDto로 바로 변환합니다.
+            return objectMapper.treeToValue(rootNode, AiStoryResponseDto.class);
 
         } catch (Exception e) {
             log.error("Failed to run python script or parse result", e);
@@ -102,26 +100,21 @@ public class AiProcessService {
 
     /**
      * 로그와 JSON이 뒤섞인 문자열에서 Wrapper JSON({ "success": ... })을 찾아냅니다.
+     * (이전 코드에서 이미 완벽하게 동작했으므로 수정 없이 유지합니다.)
      */
     private String extractJsonWrapper(String output) {
         if (output == null || output.isBlank()) {
             throw new RuntimeException("Python script returned empty output.");
         }
 
-        // 전략: Wrapper JSON은 무조건 "success"라는 키를 가지고 있습니다.
-        // "success"를 찾고, 그 앞의 가장 가까운 '{'를 찾습니다.
         int anchorIndex = output.lastIndexOf("\"success\"");
 
         if (anchorIndex == -1) {
-            // 혹시 success가 없을 수도 있으니, 기존 방식대로 metadata로 시도하거나 에러 처리
             log.warn("'success' key not found, trying fallback extraction...");
             return extractJsonFallback(output);
         }
 
-        // "success" 앞의 '{' 찾기 (JSON 시작)
         int jsonStartIndex = output.lastIndexOf("{", anchorIndex);
-
-        // 전체의 마지막 '}' 찾기 (JSON 끝)
         int jsonEndIndex = output.lastIndexOf("}");
 
         if (jsonStartIndex == -1 || jsonEndIndex == -1 || jsonStartIndex >= jsonEndIndex) {
@@ -132,7 +125,6 @@ public class AiProcessService {
         return output.substring(jsonStartIndex, jsonEndIndex + 1);
     }
 
-    // 만약 파이썬 팀원이 갑자기 맘 바꿔서 포장지를 없앨 경우를 대비한 보험
     private String extractJsonFallback(String output) {
         int metadataIndex = output.lastIndexOf("\"metadata\"");
         if (metadataIndex == -1) {
