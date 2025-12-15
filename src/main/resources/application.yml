@@ -1,41 +1,27 @@
 spring:
-  # 기본 프로필 설정
   profiles:
-    active: dev
+    active: dev # 기본 실행 환경 (dev)
     group:
-      dev:
-        - common
-        - dev
-      prod:
-        - common
-        - prod
+      dev: dev
+      prod: prod
+
+  # 파일 업로드 사이즈 제한
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
   data:
     redis:
       host: localhost
       port: 6379
       timeout: 2000
 
-  # JPA 기본 설정 (feat/#20)
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-        show_sql: true
-  
-  # 파일 업로드 사이즈 제한 (develop)
-  servlet:
-    multipart:
-      max-file-size: 25MB
-      max-request-size: 25MB
-
-
-# JWT 비밀키 (feat/#20)
+# JWT 비밀키
 jwt:
   secret: ${JWT_SECRET_KEY}
 
-# Supabase 설정 (develop)
+# Supabase 설정
 supabase:
   url: ${SUPABASE_URL}
   service-key: ${SUPABASE_SERVICE_KEY}
@@ -44,14 +30,7 @@ supabase:
     audio: ${SUPABASE_AUDIO_BUCKET}
     character: ${SUPABASE_CHARACTER_BUCKET}
 
----
-# 공통 프로필 (common)
-spring:
-  config:
-    activate:
-      on-profile: common
-
-# 카카오 설정 (feat/#20)
+# 카카오 설정
 kakao:
   client-id: ${KAKAO_CLIENT_ID}
   redirect-uri: ${KAKAO_REDIRECT_URI}

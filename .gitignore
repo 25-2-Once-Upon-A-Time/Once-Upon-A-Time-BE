@@ -7,7 +7,9 @@ build/
 .env
 devdb.mv.db
 devdb.lock.db
+devdb.trace.db
 AGENTS.md
+mock_generator.py
 
 ### STS ###
 .apt_generated

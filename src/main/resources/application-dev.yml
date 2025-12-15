@@ -11,7 +11,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # 개발용은 update / create-drop 편하게 사용
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
@@ -25,3 +25,7 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+
+ai:
+  python-path: ${AI_PYTHON_PATH}
+  script-path: ${AI_SCRIPT_PATH}

@@ -26,21 +26,25 @@ public class Script {
     private Integer seq; // 대본 순서
 
     @Column(length = 100)
-    private String role; // 역할 (예: 해설, 토끼)
+    private String role; // 역할
 
     @Lob
     @Column(columnDefinition = "TEXT")
     private String text; // 대사
 
+    @Column(length = 50)
+    private String emotion; // [추가됨] AI가 감정도 분석해주니까 저장해야 함!
+
     @Column(length = 500)
-    private String audioFilePath; // 생성된 오디오 파일 경로
+    private String audioFilePath;
 
     @Builder
-    public Script(Story story, Integer seq, String role, String text, String audioFilePath) {
+    public Script(Story story, Integer seq, String role, String text, String emotion, String audioFilePath) {
         this.story = story;
         this.seq = seq;
         this.role = role;
         this.text = text;
+        this.emotion = emotion; // [추가됨]
         this.audioFilePath = audioFilePath;
     }
 }

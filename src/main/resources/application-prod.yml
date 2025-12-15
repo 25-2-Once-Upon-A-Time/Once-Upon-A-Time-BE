@@ -2,16 +2,16 @@ spring:
   config:
     activate:
       on-profile: prod
+
   datasource:
     url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
 
-
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: validate # 배포 환경에서는 절대 update 쓰면 안 됨
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
@@ -20,3 +20,7 @@ spring:
 
 server:
   port: 60008
+
+ai:
+  python-path: ${AI_PYTHON_PATH}
+  script-path: ${AI_SCRIPT_PATH}
