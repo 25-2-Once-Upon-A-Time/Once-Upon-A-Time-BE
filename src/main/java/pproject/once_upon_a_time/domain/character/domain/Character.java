@@ -5,6 +5,7 @@ import lombok.*;
 import pproject.once_upon_a_time.global.common.BaseTimeEntity;
 import pproject.once_upon_a_time.global.common.StringListConverter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -34,7 +35,7 @@ public class Character extends BaseTimeEntity {
     private String thumbnailUrl;
 
     @Column(nullable = false, length = 500)
-    private String voiceSampleUrl;
+    private String voiceSampleUrl; // 기존 필드 유지
 
     @Column(length = 100)
     private String voiceActor;
@@ -48,4 +49,11 @@ public class Character extends BaseTimeEntity {
 
     @Column(length = 50)
     private String speakerId;
+
+    // [NEW] 샘플 오디오 리스트 추가 (CharacterSampleAudio 클래스는 별도 파일로 정의 필요)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "character_sample_audios",
+        joinColumns = @JoinColumn(name = "character_id"))
+    private List<CharacterSampleAudio> sampleAudios = new ArrayList<>();
+
 }
