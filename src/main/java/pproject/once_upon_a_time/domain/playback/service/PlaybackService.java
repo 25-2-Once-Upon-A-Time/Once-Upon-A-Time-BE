@@ -134,12 +134,10 @@ public class PlaybackService {
     @Transactional(readOnly = true)
     public void updateProgress(Long audiobookId, Member member, PlaybackProgressRequest request) {
         Long memberId = validateMember(member);
-        if (request == null || request.getCurrentTime() == null || request.getCurrentTime() < 0) {
-            throw new CustomException(ErrorCode.INVALID_PROGRESS);
-        }
-        validateStatus(request.getStatus());
+        Integer currentTime = validateProgress(request);
         PlaybackStatus status = Optional.ofNullable(request.getStatus()).orElse(PlaybackStatus.PLAYING);
-        savePlaybackToRedis(memberId, audiobookId, request.getCurrentTime(), status, LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        savePlaybackToRedisWithOrdering(memberId, audiobookId, currentTime, status, now);
     }
 
     // 재생 완료: Redis/요청값을 기반으로 DB 최종 반영 후 Redis 정리
@@ -187,6 +185,52 @@ public class PlaybackService {
         } catch (DataAccessException e) {
             log.warn("Redis 저장 실패(무시). audiobookId={}, memberId={}", audiobookId, memberId, e);
         }
+    }
+
+    // 요청 진행도 검증: null/음수/비정상 값 방지
+    private Integer validateProgress(PlaybackProgressRequest request) {
+        if (request == null) {
+            throw new CustomException(ErrorCode.INVALID_PROGRESS);
+        }
+        Integer currentTime = request.getCurrentTime();
+        if (currentTime == null || currentTime < 0) {
+            throw new CustomException(ErrorCode.INVALID_PROGRESS);
+        }
+        return currentTime;
+    }
+
+    // Redis 저장 시 순서 보장: updatedAt이 최신인 경우에만 반영, COMPLETED 이후 역행 차단
+    private void savePlaybackToRedisWithOrdering(Long memberId, Long audiobookId, Integer lastPosition,
+                                                 PlaybackStatus status, LocalDateTime updatedAt) {
+        PlaybackRedisRepository.PlaybackRedisValue current = null;
+        try {
+            current = playbackRedisRepository.readPlayback(memberId, audiobookId).orElse(null);
+        } catch (DataAccessException e) {
+            log.warn("Redis 조회 실패(무시). audiobookId={}, memberId={}", audiobookId, memberId, e);
+        }
+
+        LocalDateTime incomingAt = updatedAt != null ? updatedAt : LocalDateTime.now();
+        if (isStaleUpdate(current, incomingAt, status)) {
+            return;
+        }
+
+        savePlaybackToRedis(memberId, audiobookId, lastPosition, status, incomingAt);
+    }
+
+    private boolean isStaleUpdate(PlaybackRedisRepository.PlaybackRedisValue current,
+                                  LocalDateTime incomingAt,
+                                  PlaybackStatus incomingStatus) {
+        if (current == null) {
+            return false;
+        }
+        if (current.getUpdatedAt() != null && current.getUpdatedAt().isAfter(incomingAt)) {
+            return true;
+        }
+        if (PlaybackStatus.COMPLETED.equals(current.getStatus())
+            && !PlaybackStatus.COMPLETED.equals(incomingStatus)) {
+            return true;
+        }
+        return false;
     }
 
     // 회원 유효성 및 ID 추출
