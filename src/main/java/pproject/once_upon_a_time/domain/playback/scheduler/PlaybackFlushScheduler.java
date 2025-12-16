@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
 import pproject.once_upon_a_time.domain.audiobook.repository.AudioBookRepository;
 import pproject.once_upon_a_time.domain.playback.domain.PlaybackStatus;
@@ -30,6 +31,7 @@ public class PlaybackFlushScheduler {
 
     // Redis에 임시 저장된 진행도를 주기적으로 DB에 반영한다.
     @Scheduled(fixedDelay = FLUSH_INTERVAL_MILLIS)
+    @Transactional
     public void flushPlaybackProgress() {
         Set<String> keys;
         try {
