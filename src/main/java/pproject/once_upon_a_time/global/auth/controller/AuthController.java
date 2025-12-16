@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.global.auth.dto.request.SignupRequestDto;
-import pproject.once_upon_a_time.global.auth.dto.request.TokenReissueRequestDto; // [추가]
+import pproject.once_upon_a_time.global.auth.dto.request.TokenReissueRequestDto;
 import pproject.once_upon_a_time.global.auth.dto.response.KakaoLoginResponseDto;
 import pproject.once_upon_a_time.global.auth.dto.response.KakaoRedirectUrlResponseDto;
 import pproject.once_upon_a_time.global.auth.dto.response.TokenResponseDto;
@@ -20,16 +20,25 @@ public class AuthController {
     private final KakaoAuthService kakaoAuthService;
     private final AuthService authService;
 
+    // [수정] 프론트엔드로부터 redirectUri를 받아서 처리 (로그인 창 주소 생성)
     @GetMapping("/kakao/url")
-    public ResponseEntity<ApiResult<KakaoRedirectUrlResponseDto>> getKakaoLoginUrl() {
-        String url = kakaoAuthService.getKakaoLoginUrl();
+    public ResponseEntity<ApiResult<KakaoRedirectUrlResponseDto>> getKakaoLoginUrl(
+        @RequestParam("redirectUri") String redirectUri
+    ) {
+        // 서비스에 주소 전달
+        String url = kakaoAuthService.getKakaoLoginUrl(redirectUri);
         KakaoRedirectUrlResponseDto responseDto = new KakaoRedirectUrlResponseDto(url);
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
+    // [수정] 프론트엔드로부터 code와 redirectUri를 둘 다 받음 (토큰 교환)
     @GetMapping("/kakao/callback")
-    public ResponseEntity<ApiResult<KakaoLoginResponseDto>> kakaoLogin(@RequestParam("code") String code) {
-        KakaoLoginResponseDto responseDto = authService.kakaoLogin(code);
+    public ResponseEntity<ApiResult<KakaoLoginResponseDto>> kakaoLogin(
+        @RequestParam("code") String code,
+        @RequestParam("redirectUri") String redirectUri
+    ) {
+        // 서비스에 주소 전달
+        KakaoLoginResponseDto responseDto = authService.kakaoLogin(code, redirectUri);
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
@@ -43,7 +52,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
-    // [추가] 토큰 재발급 API
     @PostMapping("/reissue")
     public ResponseEntity<ApiResult<TokenResponseDto>> reissue(@RequestBody TokenReissueRequestDto request) {
         TokenResponseDto responseDto = authService.reissue(request);
