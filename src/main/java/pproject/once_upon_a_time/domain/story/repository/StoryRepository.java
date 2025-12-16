@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface StoryRepository extends JpaRepository<Story, Long> {
     List<Story> findByTitleContainingIgnoreCase(String title);
+    List<Story> findByMemberId(Long memberId);
+    List<Story> findByMemberIdAndTitleContainingIgnoreCase(Long memberId, String title);
 }

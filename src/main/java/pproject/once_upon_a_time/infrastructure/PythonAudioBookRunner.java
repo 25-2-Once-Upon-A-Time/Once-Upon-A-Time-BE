@@ -126,12 +126,7 @@ public class PythonAudioBookRunner {
             throw new CustomException(ErrorCode.PYTHON_PROCESS_FAILED, "파이썬 출력이 비어 있습니다.");
         }
 
-        JsonNode root;
-        try {
-            root = objectMapper.readTree(stdout);
-        } catch (JsonProcessingException e) {
-            throw new CustomException(ErrorCode.PYTHON_PROCESS_FAILED, "파이썬 출력 파싱 실패: " + e.getMessage());
-        }
+        JsonNode root = parseToJsonNode(stdout);
 
         boolean success = root.path("success").asBoolean(false);
         if (!success) {
@@ -170,5 +165,55 @@ public class PythonAudioBookRunner {
         public int durationSecondsRounded() {
             return (int) Math.round(durationSeconds);
         }
+    }
+
+    private JsonNode parseToJsonNode(String stdout) {
+        try {
+            return objectMapper.readTree(stdout);
+        } catch (JsonProcessingException primary) {
+            log.error("RAW PYTHON OUTPUT (parse failure): {}", stdout);
+            String extracted = extractJsonSegment(stdout);
+            try {
+                return objectMapper.readTree(extracted);
+            } catch (JsonProcessingException secondary) {
+                throw new CustomException(
+                        ErrorCode.PYTHON_PROCESS_FAILED,
+                        "파이썬 출력 파싱 실패: " + secondary.getMessage()
+                );
+            }
+        }
+    }
+
+    /**
+     * stdout에 로그가 섞여 있을 때 마지막 JSON 블록을 찾아낸다.
+     * (AiProcessService.extractJsonWrapper와 동일한 아이디어)
+     */
+    private String extractJsonSegment(String output) {
+        if (output == null || output.isBlank()) {
+            throw new CustomException(ErrorCode.PYTHON_PROCESS_FAILED, "파이썬 출력에서 JSON을 찾지 못했습니다.");
+        }
+
+        int successIndex = output.lastIndexOf("\"success\"");
+        if (successIndex != -1) {
+            int start = output.lastIndexOf("{", successIndex);
+            int end = output.lastIndexOf("}");
+            if (start != -1 && end != -1 && start < end) {
+                return output.substring(start, end + 1);
+            }
+        }
+
+        int braceStart = output.lastIndexOf("{");
+        int braceEnd = output.lastIndexOf("}");
+        if (braceStart != -1 && braceEnd != -1 && braceStart < braceEnd) {
+            return output.substring(braceStart, braceEnd + 1);
+        }
+
+        int arrayStart = output.indexOf("[");
+        int arrayEnd = output.lastIndexOf("]");
+        if (arrayStart != -1 && arrayEnd != -1 && arrayStart < arrayEnd) {
+            return output.substring(arrayStart, arrayEnd + 1);
+        }
+
+        throw new CustomException(ErrorCode.PYTHON_PROCESS_FAILED, "파이썬 출력에서 JSON을 찾지 못했습니다.");
     }
 }

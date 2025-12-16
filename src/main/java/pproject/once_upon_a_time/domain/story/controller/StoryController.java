@@ -39,8 +39,9 @@ public class StoryController {
 
     @GetMapping
     public ResponseEntity<ApiResult<List<StoryListResponseDto>>> getStoryList(
-            @RequestParam(required = false) String keyword) {
-        return ResponseEntity.ok(ApiResult.ok(storyService.getStoryList(keyword)));
+            @RequestParam(required = false) String keyword,
+            @Parameter(hidden = true) @LoginUser Member member) {
+        return ResponseEntity.ok(ApiResult.ok(storyService.getStoryList(keyword, member.getId())));
     }
 
     @GetMapping("/{storyId}")

@@ -62,12 +62,12 @@ public class StoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<StoryListResponseDto> getStoryList(String keyword) {
+    public List<StoryListResponseDto> getStoryList(String keyword, Long memberId) {
         List<Story> stories;
         if (keyword == null || keyword.isBlank()) {
-            stories = storyRepository.findAll();
+            stories = storyRepository.findByMemberId(memberId);
         } else {
-            stories = storyRepository.findByTitleContainingIgnoreCase(keyword);
+            stories = storyRepository.findByMemberIdAndTitleContainingIgnoreCase(memberId, keyword);
         }
         return stories.stream()
             .map(StoryListResponseDto::new)
