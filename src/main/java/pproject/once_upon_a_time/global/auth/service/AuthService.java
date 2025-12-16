@@ -146,4 +146,15 @@ public class AuthService {
         }
         return tokenResponseDto;
     }
+
+    @Transactional
+    public TokenResponseDto devLogin(Long memberId) {
+        // 1. DB에서 memberId로 회원 조회
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 2. 토큰 생성 및 반환 (기존 로그인 로직 재활용)
+        // createAndSaveToken 메서드는 이미 구현되어 있다고 가정합니다.
+        return createAndSaveToken(member);
+    }
 }
