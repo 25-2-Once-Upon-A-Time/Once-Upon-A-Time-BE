@@ -1,6 +1,8 @@
 package pproject.once_upon_a_time.global.auth.controller;
 
+import jakarta.servlet.http.HttpServletRequest; // 필수 추가
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pproject.once_upon_a_time.global.auth.dto.request.SignupRequestDto;
@@ -15,47 +17,54 @@ import pproject.once_upon_a_time.global.response.ApiResult;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final KakaoAuthService kakaoAuthService;
     private final AuthService authService;
 
-    // [수정] 프론트엔드로부터 redirectUri를 받아서 처리 (로그인 창 주소 생성)
+    // 환경별 리다이렉트 주소 설정
+    private static final String PROD_REDIRECT_URI = "https://once-upon-a-time-beta.vercel.app/kakao/callback";
+    private static final String DEV_REDIRECT_URI = "http://localhost:3000/kakao/callback";
+
     @GetMapping("/kakao/url")
-    public ResponseEntity<ApiResult<KakaoRedirectUrlResponseDto>> getKakaoLoginUrl(
-        @RequestParam("redirectUri") String redirectUri
-    ) {
-        // 서비스에 주소 전달
+    public ResponseEntity<ApiResult<KakaoRedirectUrlResponseDto>> getKakaoLoginUrl(HttpServletRequest request) {
+        String redirectUri = determineRedirectUri(request); // 주소 자동 결정
         String url = kakaoAuthService.getKakaoLoginUrl(redirectUri);
-        KakaoRedirectUrlResponseDto responseDto = new KakaoRedirectUrlResponseDto(url);
-        return ResponseEntity.ok(ApiResult.ok(responseDto));
+        return ResponseEntity.ok(ApiResult.ok(new KakaoRedirectUrlResponseDto(url)));
     }
 
-    // [수정] 프론트엔드로부터 code와 redirectUri를 둘 다 받음 (토큰 교환)
     @GetMapping("/kakao/callback")
     public ResponseEntity<ApiResult<KakaoLoginResponseDto>> kakaoLogin(
         @RequestParam("code") String code,
-        @RequestParam("redirectUri") String redirectUri
+        HttpServletRequest request
     ) {
-        // 서비스에 주소 전달
+        String redirectUri = determineRedirectUri(request); // 주소 자동 결정
+        log.info("Redirect URI 감지: {}", redirectUri);
+
         KakaoLoginResponseDto responseDto = authService.kakaoLogin(code, redirectUri);
         return ResponseEntity.ok(ApiResult.ok(responseDto));
     }
 
+    // [핵심] 요청이 어디서 왔는지(Referer) 확인해서 주소를 결정하는 메서드
+    private String determineRedirectUri(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        if (referer != null && referer.contains("localhost")) {
+            return DEV_REDIRECT_URI;
+        }
+        return PROD_REDIRECT_URI;
+    }
+
+    // ... (회원가입, 재발급, 로그아웃, DevLogin 등 나머지 메서드는 기존 유지) ...
     @PostMapping("/signup/kakao")
-    public ResponseEntity<ApiResult<TokenResponseDto>> signup(
-        @RequestHeader("Authorization") String authorizationHeader,
-        @RequestBody SignupRequestDto requestDto
-    ) {
-        String signupToken = authorizationHeader.substring(7); // "Bearer " 제거
-        TokenResponseDto responseDto = authService.signup(signupToken, requestDto);
-        return ResponseEntity.ok(ApiResult.ok(responseDto));
+    public ResponseEntity<ApiResult<TokenResponseDto>> signup(@RequestHeader("Authorization") String authorizationHeader, @RequestBody SignupRequestDto requestDto) {
+        String signupToken = authorizationHeader.substring(7);
+        return ResponseEntity.ok(ApiResult.ok(authService.signup(signupToken, requestDto)));
     }
 
     @PostMapping("/reissue")
     public ResponseEntity<ApiResult<TokenResponseDto>> reissue(@RequestBody TokenReissueRequestDto request) {
-        TokenResponseDto responseDto = authService.reissue(request);
-        return ResponseEntity.ok(ApiResult.ok(responseDto));
+        return ResponseEntity.ok(ApiResult.ok(authService.reissue(request)));
     }
 
     @PostMapping("/logout")
