@@ -24,16 +24,41 @@ public class AiStoryResponseDto {
     @NoArgsConstructor
     public static class AiStoryData {
         private Map<String, Object> metadata;
+
         @JsonProperty("story_info")
         private StoryInfo storyInfo;
+
         private List<ScriptSegment> script;
+
         private String content;
         private String category;
         private String moral;
-        // [수정 완료] Map -> List<Map> 으로 변경!
-        // 에러 원인: AI가 배열([])을 주는데 Map({})으로 받으려 했음.
-        private List<Map<String, Object>> characters;
+
+        // [최종 수정] List<Map> -> Object 로 변경
+        // 이유: AI가 리스트([])를 줄 때도 있고, 그냥 설명글("")을 줄 때도 있음
+        private Object characters;
+
         private List<String> tags;
+
+        // [추가] 안전하게 캐릭터 리스트를 반환하는 메서드
+        // 서비스(Service) 계층에서는 getCharacters() 대신 이걸 호출하세요!
+        public List<Map<String, Object>> getSafeCharacters() {
+            if (characters instanceof List) {
+                // 리스트로 왔을 경우 그대로 반환
+                return (List<Map<String, Object>>) characters;
+            }
+            // 문자열이나 다른 걸로 왔을 경우 -> 빈 리스트 반환 (에러 방지)
+            // 필요하다면 여기서 문자열을 파싱해서 Map으로 만드는 로직을 추가할 수도 있음
+            return java.util.Collections.emptyList();
+        }
+
+        // [추가] 캐릭터 설명글이 필요할 때 쓰는 메서드
+        public String getCharactersDescription() {
+            if (characters instanceof String) {
+                return (String) characters;
+            }
+            return "";
+        }
     }
 
     // -------------------------------------------------------------------
