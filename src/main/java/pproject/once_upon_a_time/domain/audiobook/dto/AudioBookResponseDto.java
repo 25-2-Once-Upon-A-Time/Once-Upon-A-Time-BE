@@ -45,7 +45,7 @@ public class AudioBookResponseDto {
         @Schema(description = "캐릭터 이름", example = "루비")
         private String characterName;
 
-        @Schema(description = "오디오북 길이(초)", example = "600")
-        private Integer duration;
+        @Schema(description = "오디오북 길이(초, 소수점 허용)", example = "600.5")
+        private Double duration;
     }
 }

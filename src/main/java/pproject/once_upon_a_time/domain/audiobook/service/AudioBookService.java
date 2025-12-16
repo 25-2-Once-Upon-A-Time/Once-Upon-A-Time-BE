@@ -75,7 +75,7 @@ public class AudioBookService {
                 .character(character)
                 .member(authenticatedMember)
                 .audioUrl(result.audioUrl())
-                .duration(result.durationSecondsRounded())
+                .duration(result.durationSeconds())
                 .build();
 
         return audioBookRepository.save(audioBook);

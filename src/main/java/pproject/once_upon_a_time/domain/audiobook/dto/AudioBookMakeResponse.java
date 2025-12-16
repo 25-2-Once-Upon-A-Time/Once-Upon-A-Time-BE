@@ -20,8 +20,8 @@ public class AudioBookMakeResponse {
     @Schema(description = "오디오북 URL", example = "https://mock.storage.local/audiobooks/title_voice.wav")
     private String audioUrl;
 
-    @Schema(description = "총 재생 시간(초)", example = "12")
-    private Integer duration;
+    @Schema(description = "총 재생 시간(초, 소수점 허용)", example = "12.34")
+    private Double duration;
 
     @Schema(description = "스토리 ID", example = "1")
     private Long storyId;

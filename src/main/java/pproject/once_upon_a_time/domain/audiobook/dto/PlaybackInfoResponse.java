@@ -29,8 +29,8 @@ public class PlaybackInfoResponse {
     @Schema(description = "재생 상태", example = "PLAYING")
     private PlaybackStatus status;
 
-    @Schema(description = "오디오북 길이(초)", example = "600")
-    private Integer duration;
+    @Schema(description = "오디오북 길이(초, 소수점 허용)", example = "600.25")
+    private Double duration;
 
     @Schema(description = "동화 제목", example = "숲속의 용감한 토끼")
     private String storyTitle;

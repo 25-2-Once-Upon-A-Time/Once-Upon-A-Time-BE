@@ -76,7 +76,7 @@ class AudioBookServiceIntegrationTest {
 
         assertThat(audioBookRepository.count()).isEqualTo(1);
         assertThat(audioBook.getAudioUrl()).startsWith("https://mock.storage.local/audiobooks/");
-        assertThat(audioBook.getDuration()).isEqualTo(Math.round(3 * 3.0));
+        assertThat(audioBook.getDuration()).isEqualTo(3 * 3.14);
         assertThat(audioBook.getMember().getId()).isEqualTo(member.getId());
         verify(pythonAudioBookRunner, times(1)).run(any());
     }

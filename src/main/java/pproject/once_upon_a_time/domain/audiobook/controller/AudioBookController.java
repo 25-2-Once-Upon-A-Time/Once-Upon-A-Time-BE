@@ -103,7 +103,7 @@ public class AudioBookController {
                         "분위기",
                         "https://example.com/thumbnail.jpg",
                         "캐릭터 이름",
-                        600
+                        60.4
                 ))
         );
 
