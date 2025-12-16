@@ -27,4 +27,5 @@ ai:
 
 python:
   image-path: /home/t25301/ai/image_generator.py
+  audiobook-path: /home/t25301/ai/audiobook_generator.py
   timeout-seconds: 120

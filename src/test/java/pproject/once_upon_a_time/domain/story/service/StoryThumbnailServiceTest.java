@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.story.domain.GenerationStatus;
 import pproject.once_upon_a_time.domain.story.domain.Story;
@@ -115,8 +116,7 @@ class StoryThumbnailServiceTest {
     }
 
     private Story createStory(Member member, GenerationStatus status, String thumbnailUrl) {
-        return Story.builder()
-                .id(1L)
+        Story story = Story.builder()
                 .member(member)
                 .title("title")
                 .content("content")
@@ -124,5 +124,7 @@ class StoryThumbnailServiceTest {
                 .generationStatus(status)
                 .thumbnailUrl(thumbnailUrl)
                 .build();
+        ReflectionTestUtils.setField(story, "id", 1L);
+        return story;
     }
 }

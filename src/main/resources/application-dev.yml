@@ -32,4 +32,5 @@ ai:
 
 python:
   image-path: content/image_mock.py
+  audiobook-path: content/audio_mock.py
   timeout-seconds: 120
