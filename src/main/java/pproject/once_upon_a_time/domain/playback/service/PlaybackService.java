@@ -202,17 +202,17 @@ public class PlaybackService {
     }
 
     // 진행률 계산 (duration 기반)
-    private float calculateProgressRate(Integer duration, Integer position) {
+    private float calculateProgressRate(Double duration, Integer position) {
         if (duration == null || duration <= 0) {
             return 0f;
         }
         int safePosition = Optional.ofNullable(position).orElse(0);
-        float rate = (float) safePosition / duration;
+        float rate = (float) (safePosition / duration);
         return Math.min(1.0f, Math.max(0f, rate));
     }
 
     // int 입력용 진행률 계산
-    private float calculateProgressRate(Integer duration, int position) {
+    private float calculateProgressRate(Double duration, int position) {
         return calculateProgressRate(duration, Integer.valueOf(position));
     }
 

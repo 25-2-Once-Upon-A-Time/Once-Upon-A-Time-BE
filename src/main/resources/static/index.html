@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>Backend Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #ffffff;
+            padding: 32px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 24px;
+            font-size: 20px;
+        }
+        a.button {
+            display: block;
+            margin: 12px 0;
+            padding: 12px;
+            background: #2f80ed;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        a.button.secondary {
+            background: #4f4f4f;
+        }
+        a.button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>옛날옛적의 백엔드 서버입니다.</h1>
+
+    <!-- Swagger -->
+    <a class="button" href="/swagger-ui/index.html">
+        Swagger API Docs
+    </a>
+
+    <!-- 현재 배포 서버(API 루트 확인용) -->
+    <a class="button secondary" href=https://once-upon-a-time-beta.vercel.app/>
+        배포 서버
+    </a>
+</div>
+</body>
+</html>

@@ -35,6 +35,6 @@ public class AudioBook {
     private String audioUrl;
 
     @Column(name = "duration", nullable = false)
-    private Integer duration;
+    private Double duration;
     
 }

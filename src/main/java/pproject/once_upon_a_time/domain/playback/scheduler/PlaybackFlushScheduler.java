@@ -79,7 +79,7 @@ public class PlaybackFlushScheduler {
             return;
         }
 
-        int duration = Optional.ofNullable(audioBookOpt.get().getDuration()).orElse(0);
+        double duration = Optional.ofNullable(audioBookOpt.get().getDuration()).orElse(0.0d);
         float progressRate = calculateProgressRate(duration, lastPosition);
         int listenedDuration = lastPosition;
         PlaybackStatus status = Optional.ofNullable(parsed.value.getStatus()).orElse(PlaybackStatus.PLAYING);
@@ -87,12 +87,12 @@ public class PlaybackFlushScheduler {
         playbackRepository.updateProgress(audiobookId, memberId, lastPosition, progressRate, listenedDuration, status);
     }
 
-    private float calculateProgressRate(Integer duration, Integer position) {
+    private float calculateProgressRate(Double duration, Integer position) {
         if (duration == null || duration <= 0) {
             return 0f;
         }
         int safePosition = Optional.ofNullable(position).orElse(0);
-        float rate = (float) safePosition / duration;
+        float rate = (float) (safePosition / duration);
         return Math.min(1.0f, Math.max(0f, rate));
     }
 
