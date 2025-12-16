@@ -30,9 +30,10 @@ public class AiStoryResponseDto {
         private String content;
         private String category;
         private String moral;
-        private Map<String, Object> characters;
+        // [수정 완료] Map -> List<Map> 으로 변경!
+        // 에러 원인: AI가 배열([])을 주는데 Map({})으로 받으려 했음.
+        private List<Map<String, Object>> characters;
         private List<String> tags;
-        // verification_status 등은 필요시 추가
     }
 
     // -------------------------------------------------------------------
