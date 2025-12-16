@@ -55,4 +55,9 @@ public class AuthController {
         authService.logout(accessToken);
         return ResponseEntity.ok(ApiResult.ok(null));
     }
+
+    @GetMapping("/dev/login")
+    public ResponseEntity<ApiResult<TokenResponseDto>> devLogin(@RequestParam Long memberId) {
+        return ResponseEntity.ok(ApiResult.ok(authService.devLogin(memberId)));
+    }
 }
