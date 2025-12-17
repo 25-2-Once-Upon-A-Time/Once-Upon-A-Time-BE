@@ -20,6 +20,7 @@ public enum ErrorCode {
     REDIS_PLAYBACK_NOT_FOUND(400_006, HttpStatus.BAD_REQUEST, "Redis에서 재생 정보를 찾을 수 없습니다."),
     INVALID_STATUS(400_007, HttpStatus.BAD_REQUEST, "잘못된 재생 상태입니다."),
     REDIS_KEY_INVALID(400_008, HttpStatus.BAD_REQUEST, "잘못된 Redis 키 형식입니다."),
+    PATH_VARIABLE_TYPE_MISMATCH(400_009, HttpStatus.BAD_REQUEST, "경로 변수가 올바르지 않습니다."),
 
 
     // ========================
