@@ -13,7 +13,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "audio_books_playback")
+@Table(
+        name = "audio_books_playback",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_audio_book_playback_member", columnNames = {"audiobook_id", "member_id"})
+        }
+)
 public class AudioBookPlayback extends BaseTimeEntity {
 
     @Id

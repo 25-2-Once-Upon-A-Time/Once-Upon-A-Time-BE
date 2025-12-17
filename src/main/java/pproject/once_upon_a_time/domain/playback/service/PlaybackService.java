@@ -34,7 +34,7 @@ public class PlaybackService {
     private final PlaybackRedisRepository playbackRedisRepository;
 
     // 재생 정보 조회: Redis 값이 있으면 우선 적용
-    @Transactional(readOnly = true)
+    @Transactional
     public PlaybackInfoResponse getInfo(Long audiobookId, Member member) {
         Long memberId = validateMember(member);
 
@@ -42,7 +42,7 @@ public class PlaybackService {
                 .orElseThrow(() -> new CustomException(ErrorCode.AUDIOBOOK_NOT_FOUND));
 
         AudioBookPlayback playback = playbackRepository.findByAudioBook_IdAndMemberId_Id(audiobookId, memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PLAYBACK_NOT_FOUND));
+                .orElseGet(() -> createInitialPlayback(audioBook, member));
 
         Story story = audioBook.getStory();
         if (story == null) {
@@ -215,6 +215,19 @@ public class PlaybackService {
         }
 
         savePlaybackToRedis(memberId, audiobookId, lastPosition, status, incomingAt);
+    }
+
+    private AudioBookPlayback createInitialPlayback(AudioBook audioBook, Member member) {
+        float progressRate = calculateProgressRate(audioBook.getDuration(), 0);
+        AudioBookPlayback playback = AudioBookPlayback.builder()
+                .audioBook(audioBook)
+                .memberId(member)
+                .lastPosition(0)
+                .listenedDuration(0)
+                .progressRate(progressRate)
+                .status(PlaybackStatus.PAUSED)
+                .build();
+        return playbackRepository.save(playback);
     }
 
     private boolean isStaleUpdate(PlaybackRedisRepository.PlaybackRedisValue current,
