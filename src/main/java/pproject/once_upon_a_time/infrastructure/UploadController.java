@@ -21,37 +21,37 @@ import java.io.IOException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/upload")
-@Tag(name = "Upload", description = "Supabase 스토리지 업로드 API")
+@Tag(name = "Upload", description = "S3 스토리지 업로드 API")
 public class UploadController {
 
-    private final SupabaseStorageService storageService;
+    private final StorageService storageService;
 
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "이미지 업로드", description = "이미지 파일을 Supabase 이미지 버킷에 업로드합니다.")
+    @Operation(summary = "이미지 업로드", description = "이미지 파일을 S3에 업로드합니다.")
     @ApiResponse(responseCode = "200", description = "업로드 성공",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UploadUrlApiResult.class)))
     public ResponseEntity<ApiResult<UploadUrlResponse>> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = storageService.uploadFile(file, SupabaseStorageService.FileType.IMAGE);
+        String url = storageService.uploadFile(file, StorageService.FileType.IMAGE);
         var body = ApiResult.ok(new UploadUrlResponse(url));
         return ResponseEntity.status(body.httpStatus()).body(body);
     }
 
     @PostMapping(value = "/audio", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "오디오 업로드", description = "오디오 파일을 Supabase 오디오 버킷에 업로드합니다.")
+    @Operation(summary = "오디오 업로드", description = "오디오 파일을 S3에 업로드합니다.")
     @ApiResponse(responseCode = "200", description = "업로드 성공",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UploadUrlApiResult.class)))
     public ResponseEntity<ApiResult<UploadUrlResponse>> uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = storageService.uploadFile(file, SupabaseStorageService.FileType.AUDIO);
+        String url = storageService.uploadFile(file, StorageService.FileType.AUDIO);
         var body = ApiResult.ok(new UploadUrlResponse(url));
         return ResponseEntity.status(body.httpStatus()).body(body);
     }
 
     @PostMapping(value = "/character", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "캐릭터 오디오 업로드", description = "캐릭터용 오디오 파일을 Supabase 캐릭터 버킷에 업로드합니다.")
+    @Operation(summary = "캐릭터 오디오 업로드", description = "캐릭터용 오디오 파일을 S3에 업로드합니다.")
     @ApiResponse(responseCode = "200", description = "업로드 성공",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UploadUrlApiResult.class)))
     public ResponseEntity<ApiResult<UploadUrlResponse>> uploadCharacter(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = storageService.uploadFile(file, SupabaseStorageService.FileType.CHARACTER);
+        String url = storageService.uploadFile(file, StorageService.FileType.CHARACTER);
         var body = ApiResult.ok(new UploadUrlResponse(url));
         return ResponseEntity.status(body.httpStatus()).body(body);
     }
