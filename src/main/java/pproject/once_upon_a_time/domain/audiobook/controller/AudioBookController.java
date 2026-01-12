@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pproject.once_upon_a_time.auth.annotation.LoginUser;
-import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
 import pproject.once_upon_a_time.domain.audiobook.dto.AudioBookMakeRequest;
-import pproject.once_upon_a_time.domain.audiobook.dto.AudioBookMakeResponse;
 import pproject.once_upon_a_time.domain.audiobook.dto.AudioBookResponseDto;
 import pproject.once_upon_a_time.domain.audiobook.service.AudioBookService;
+import pproject.once_upon_a_time.domain.job.domain.Job;
+import pproject.once_upon_a_time.domain.job.dto.JobResponseDto;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.global.response.ApiResult;
 import pproject.once_upon_a_time.global.response.ExceptionDto;
@@ -69,21 +69,12 @@ public class AudioBookController {
             @ApiResponse(responseCode = "400", description = "잘못된 입력"),
             @ApiResponse(responseCode = "404", description = "스토리 또는 캐릭터 없음")
     })
-    public ResponseEntity<ApiResult<AudioBookMakeResponse>> makeAudioBook(
+    public ResponseEntity<ApiResult<JobResponseDto>> makeAudioBook(
             @Valid @RequestBody AudioBookMakeRequest request,
             @Parameter(hidden = true) @LoginUser Member member
     ) {
-        AudioBook audioBook = audioBookService.makeAudioBook(request.getStoryId(), request.getCharacterId(), member);
-
-        AudioBookMakeResponse response = AudioBookMakeResponse.builder()
-                .audioBookId(audioBook.getId())
-                .audioUrl(audioBook.getAudioUrl())
-                .duration(audioBook.getDuration())
-                .storyId(request.getStoryId())
-                .characterId(request.getCharacterId())
-                .build();
-
-        var body = ApiResult.created(response);
+        Job job = audioBookService.createAudioBookJob(request.getStoryId(), request.getCharacterId(), member);
+        var body = ApiResult.accepted(JobResponseDto.from(job));
         return ResponseEntity.status(body.httpStatus()).body(body);
     }
 

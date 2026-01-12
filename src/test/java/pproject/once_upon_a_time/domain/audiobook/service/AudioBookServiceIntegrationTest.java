@@ -3,12 +3,15 @@ package pproject.once_upon_a_time.domain.audiobook.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.annotation.DirtiesContext;
-import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import pproject.once_upon_a_time.domain.audiobook.repository.AudioBookRepository;
 import pproject.once_upon_a_time.domain.character.domain.Character;
 import pproject.once_upon_a_time.domain.character.repository.CharacterRepository;
+import pproject.once_upon_a_time.domain.job.domain.Job;
+import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobType;
+import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.member.domain.Member;
 import pproject.once_upon_a_time.domain.member.repository.MemberRepository;
 import pproject.once_upon_a_time.domain.script.domain.Script;
@@ -19,16 +22,18 @@ import pproject.once_upon_a_time.domain.story.repository.StoryRepository;
 import pproject.once_upon_a_time.global.common.MemberRole;
 import pproject.once_upon_a_time.global.exception.CustomException;
 import pproject.once_upon_a_time.global.exception.ErrorCode;
-import pproject.once_upon_a_time.infrastructure.PythonAudioBookRunner;
+import pproject.once_upon_a_time.global.storage.S3StorageService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE",
@@ -37,9 +42,15 @@ import static org.mockito.Mockito.verify;
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.jpa.show-sql=false",
+        "jwt.secret=test-secret-test-secret-test-secret-1234",
+        "aws.region=ap-northeast-2",
+        "aws.s3.bucket=test-bucket",
+        "aws.s3.presign-ttl-seconds=900",
+        "aws.sqs.queue-url=https://sqs.ap-northeast-2.amazonaws.com/000000000000/test",
+        "kakao.client-id=test-client",
         "python.audiobook-path=content/audio_mock.py",
-        "ai.python-path=python3",
-        "python.timeout-seconds=30"
+        "python.image-path=content/image_mock.py",
+        "python.timeout-seconds=120"
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AudioBookServiceIntegrationTest {
@@ -62,37 +73,52 @@ class AudioBookServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @SpyBean
-    private PythonAudioBookRunner pythonAudioBookRunner;
+    @MockitoBean
+    private JobService jobService;
+
+    @MockitoBean
+    private S3StorageService s3StorageService;
 
     @Test
-    void makeAudioBook_savesAudioBookWithParsedResult() {
+    void createAudioBookJob_uploadsInputAndPublishesJob() throws Exception {
         Member member = memberRepository.save(createMember("kakao-1", "nick1"));
         Story story = storyRepository.save(createStory(member, "테스트 동화"));
         Character character = characterRepository.save(createCharacter("W0208_사서"));
         saveScripts(story, List.of("첫 문장", "두 번째 문장", "세 번째 문장"));
 
-        AudioBook audioBook = audioBookService.makeAudioBook(story.getId(), character.getId(), member);
+        Job job = Job.builder()
+                .type(JobType.AUDIOBOOK)
+                .status(JobStatus.PENDING)
+                .build();
+        UUID jobId = UUID.randomUUID();
+        java.lang.reflect.Field idField = Job.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(job, jobId);
 
-        assertThat(audioBookRepository.count()).isEqualTo(1);
-        assertThat(audioBook.getAudioUrl()).startsWith("https://mock.storage.local/audiobooks/");
-        assertThat(audioBook.getDuration()).isEqualTo(3 * 3.14);
-        assertThat(audioBook.getMember().getId()).isEqualTo(member.getId());
-        verify(pythonAudioBookRunner, times(1)).run(any());
+        when(jobService.createJob(eq(JobType.AUDIOBOOK), eq(null))).thenReturn(job);
+
+        Job result = audioBookService.createAudioBookJob(story.getId(), character.getId(), member);
+
+        assertThat(result.getId()).isEqualTo(jobId);
+        assertThat(audioBookRepository.count()).isZero();
+
+        String inputKey = "jobs/" + jobId + "/audiobook/input.json";
+        verify(s3StorageService).uploadJson(eq(inputKey), any());
+        verify(jobService).updateInputKey(job, inputKey);
+        verify(jobService).publishJob(job);
     }
 
     @Test
-    void makeAudioBook_throwsWhenNoScripts() {
+    void createAudioBookJob_throwsWhenNoScripts() {
         Member member = memberRepository.save(createMember("kakao-2", "nick2"));
         Story story = storyRepository.save(createStory(member, "스크립트 없음 동화"));
         Character character = characterRepository.save(createCharacter("W0208_사서"));
 
         CustomException exception = assertThrows(CustomException.class,
-                () -> audioBookService.makeAudioBook(story.getId(), character.getId(), member));
+                () -> audioBookService.createAudioBookJob(story.getId(), character.getId(), member));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_INPUT);
         assertThat(audioBookRepository.count()).isZero();
-        verify(pythonAudioBookRunner, times(0)).run(any());
     }
 
     private Member createMember(String kakaoUserId, String nickname) {

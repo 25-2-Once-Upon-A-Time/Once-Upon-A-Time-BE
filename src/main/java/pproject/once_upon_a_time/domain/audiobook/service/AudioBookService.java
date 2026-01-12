@@ -3,8 +3,10 @@ package pproject.once_upon_a_time.domain.audiobook.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pproject.once_upon_a_time.domain.audiobook.domain.AudioBook;
 import pproject.once_upon_a_time.domain.audiobook.dto.AudioBookResponseDto;
+import pproject.once_upon_a_time.domain.job.domain.Job;
+import pproject.once_upon_a_time.domain.job.domain.JobType;
+import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.character.domain.Character;
 import pproject.once_upon_a_time.domain.character.repository.CharacterRepository;
 import pproject.once_upon_a_time.domain.audiobook.repository.AudioBookRepository;
@@ -15,8 +17,11 @@ import pproject.once_upon_a_time.domain.story.domain.Story;
 import pproject.once_upon_a_time.domain.story.repository.StoryRepository;
 import pproject.once_upon_a_time.global.exception.CustomException;
 import pproject.once_upon_a_time.global.exception.ErrorCode;
-import pproject.once_upon_a_time.infrastructure.PythonAudioBookRunner;
+import pproject.once_upon_a_time.global.storage.S3StorageService;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,7 +33,9 @@ public class AudioBookService {
     private final StoryRepository storyRepository;
     private final CharacterRepository characterRepository;
     private final ScriptRepository scriptRepository;
-    private final PythonAudioBookRunner pythonAudioBookRunner;
+    private final JobService jobService;
+    private final S3StorageService s3StorageService;
+    private final ObjectMapper objectMapper;
 
     // 회원이 보유한 오디오북 목록을 조회한다.
     @Transactional(readOnly = true)
@@ -40,7 +47,7 @@ public class AudioBookService {
     }
 
     @Transactional
-    public AudioBook makeAudioBook(Long storyId, Long characterId, Member member) {
+    public Job createAudioBookJob(Long storyId, Long characterId, Member member) {
         Member authenticatedMember = requireAuthenticatedMember(member);
         Story story = storyRepository.findById(storyId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORY_NOT_FOUND));
@@ -52,33 +59,14 @@ public class AudioBookService {
             throw new CustomException(ErrorCode.INVALID_INPUT, "해당 스토리에 스크립트가 없습니다.");
         }
 
-        List<PythonAudioBookRunner.ScriptItem> scriptItems = scripts.stream()
-                .map(script -> new PythonAudioBookRunner.ScriptItem(
-                        script.getSeq(),
-                        Objects.toString(script.getText(), "")
-                ))
-                .toList();
+        Job job = jobService.createJob(JobType.AUDIOBOOK, null);
+        String inputKey = buildInputKey(job);
+        String inputJson = buildAudioBookInput(story, character, scripts);
+        s3StorageService.uploadJson(inputKey, inputJson);
+        jobService.updateInputKey(job, inputKey);
+        jobService.publishJob(job);
 
-        String title = Objects.toString(story.getTitle(), "Untitled");
-        String narratorVoice = Objects.toString(character.getCharacterName(), "UNKNOWN");
-
-        PythonAudioBookRunner.AudioBookPayload payload = new PythonAudioBookRunner.AudioBookPayload(
-                title,
-                narratorVoice,
-                scriptItems
-        );
-
-        PythonAudioBookRunner.AudioBookResult result = pythonAudioBookRunner.run(payload);
-
-        AudioBook audioBook = AudioBook.builder()
-                .story(story)
-                .character(character)
-                .member(authenticatedMember)
-                .audioUrl(result.audioUrl())
-                .duration(result.durationSeconds())
-                .build();
-
-        return audioBookRepository.save(audioBook);
+        return job;
     }
 
     private Member requireAuthenticatedMember(Member member) {
@@ -92,5 +80,32 @@ public class AudioBookService {
         }
 
         return member;
+    }
+
+    private String buildAudioBookInput(Story story, Character character, List<Script> scripts) {
+        try {
+            var root = objectMapper.createObjectNode();
+            root.put("title", Objects.toString(story.getTitle(), "Untitled"));
+            root.put("character_name", Objects.toString(character.getCharacterName(), "UNKNOWN"));
+
+            List<java.util.Map<String, Object>> scriptItems = new ArrayList<>();
+            for (Script script : scripts) {
+                java.util.Map<String, Object> item = new HashMap<>();
+                item.put("seq", script.getSeq());
+                item.put("role", script.getRole());
+                item.put("text", Objects.toString(script.getText(), ""));
+                item.put("emotion", script.getEmotion());
+                item.put("audio_file_name", "segment_" + script.getSeq() + ".wav");
+                scriptItems.add(item);
+            }
+            root.putPOJO("script", scriptItems);
+            return objectMapper.writeValueAsString(root);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_INPUT, "오디오북 입력 JSON 생성 실패: " + e.getMessage());
+        }
+    }
+
+    private String buildInputKey(Job job) {
+        return "jobs/" + job.getId() + "/audiobook/input.json";
     }
 }
