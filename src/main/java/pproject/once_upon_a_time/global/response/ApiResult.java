@@ -19,6 +19,10 @@ public record ApiResult<T>(
         return new ApiResult<>(HttpStatus.CREATED, true, data, null);
     }
 
+    public static <T> ApiResult<T> accepted(@Nullable final T data) {
+        return new ApiResult<>(HttpStatus.ACCEPTED, true, data, null);
+    }
+
     public static <T> ApiResult<T> fail(final CustomException e, final String path) {
         return new ApiResult<>(
                 e.getErrorCode().getHttpStatus(),

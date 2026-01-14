@@ -7,98 +7,55 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-northeast-2
+      ECR_AWS_ACCOUNT_ID: 563185858648
+      ECR_REPOSITORY: ouat/worker
+      ECR_IMAGE_TAG: latest
 
     steps:
       # 1. Checkout
       - name: Checkout
         uses: actions/checkout@v3
 
-      # 2. Set up JDK 17
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      # 2. Configure AWS credentials for ECR
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          distribution: 'temurin'
-          java-version: 17
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # 3. Build Spring Boot JAR
-      - name: Build Spring Boot JAR
-        run: ./gradlew clean build -x test
+      # 3. Login to ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Debug JAR list
-      - name: Show built artifacts
-        run: ls -l build/libs
-  
-      # 5. Upload ONLY bootJar to server (strip folders)
-      - name: Upload Boot JAR to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-          source: "build/libs/*SNAPSHOT.jar"
-          target: "/home/t25301/backend/"
-          strip_components: 2
-  
-      # 6. Restart Spring Boot on Server
-      - name: Restart Spring Boot on Server
+      # 4. Build and push Docker image
+      - name: Build and push Docker image
+        run: |
+          IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${ECR_IMAGE_TAG}"
+          docker build -f Dockerfile.api -t "${IMAGE_URI}" .
+          docker push "${IMAGE_URI}"
+
+      # 5. Deploy on EC2
+      - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          envs: AWS_REGION,ECR_AWS_ACCOUNT_ID,ECR_REPOSITORY,ECR_IMAGE_TAG
           script: |
-            cd /home/t25301/backend
-            
-            # Step 1: Load environment variables
-            echo "Loading .env variables..."
-            if [ -f .env ]; then
-              set -o allexport
-              source .env
-              set +o allexport
-              echo ".env loaded successfully"
-            else
-              echo "⚠️ Warning: .env file not found"
-            fi
-            
-            # Step 2 & 3: Kill only actual Java processes (not bash scripts)
-            echo "Stopping existing Spring Boot processes..."
-            for pid in $(pgrep -u t25301 -f "^java.*\.jar" 2>/dev/null); do
-              echo "Killing Java PID: $pid"
-              kill -9 $pid 2>/dev/null || true
-            done
-            sleep 2
-            
-            # Step 4: Find latest JAR
-            echo "Finding latest JAR..."
-            LATEST_JAR=$(ls -t *SNAPSHOT.jar 2>/dev/null | head -n 1)
-            
-            if [ -z "$LATEST_JAR" ]; then
-              echo "❌ ERROR: No JAR file found"
-              ls -la
-              exit 1
-            fi
-            
-            echo "Using: $LATEST_JAR"
-            
-            # Step 5: Start Spring Boot
-            echo "Starting Spring Boot..."
-            nohup java -jar $LATEST_JAR \
-              --spring.profiles.active=$SPRING_PROFILES_ACTIVE \
-              --server.port=$SERVER_PORT > app.log 2>&1 &
+            IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${ECR_IMAGE_TAG}"
+            docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_REGION}) ${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+            docker pull "${IMAGE_URI}"
 
-            
-            sleep 3
-            
-            # Step 6: Verify (with better pattern)
-            echo "Checking if process is running..."
-            RUNNING=$(pgrep -u t25301 -f "^java.*\.jar" 2>/dev/null || echo "")
-            
-            if [ -n "$RUNNING" ]; then
-              echo "✅ SUCCESS: Spring Boot is running"
-              ps -u t25301 -f | grep "[j]ava"
-            else
-              echo "❌ ERROR: Spring Boot did NOT start"
-              echo "---- Last 50 lines of app.log ----"
-              tail -n 50 app.log
-              exit 1
-            fi
+            docker stop ouat-api || true
+            docker rm ouat-api || true
+
+            docker run -d \
+              --name ouat-api \
+              --restart unless-stopped \
+              --env-file /home/ubuntu/backend/.env \
+              -p 8080:8080 \
+              "${IMAGE_URI}"
