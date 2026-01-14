@@ -79,5 +79,5 @@ jobs:
             --region "${AWS_REGION}" \
             --command-id "${COMMAND_ID}" \
             --instance-id "${{ secrets.SSM_INSTANCE_ID }}" \
-            --query "Status,StandardOutputContent,StandardErrorContent" \
+            --query "[Status,StandardOutputContent,StandardErrorContent]" \
             --output text
