@@ -10,8 +10,10 @@ jobs:
     env:
       AWS_REGION: ap-northeast-2
       ECR_AWS_ACCOUNT_ID: 563185858648
-      ECR_REPOSITORY: ouat/worker
+      ECR_API_REPOSITORY: ouat/api
+      ECR_WORKER_REPOSITORY: ouat/worker
       ECR_IMAGE_TAG: latest
+      ECR_WORKER_IMAGE_TAG: latest
 
     steps:
       # 1. Checkout
@@ -30,32 +32,40 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Build and push Docker image
-      - name: Build and push Docker image
+      # 4. Build and push API Docker image
+      - name: Build and push API Docker image
         run: |
-          IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${ECR_IMAGE_TAG}"
-          docker build -f Dockerfile.api -t "${IMAGE_URI}" .
-          docker push "${IMAGE_URI}"
+          API_IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_API_REPOSITORY}:${ECR_IMAGE_TAG}"
+          docker build -f Dockerfile.api -t "${API_IMAGE_URI}" .
+          docker push "${API_IMAGE_URI}"
 
-      # 5. Deploy on EC2
-      - name: Deploy Docker container on EC2
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
-          envs: AWS_REGION,ECR_AWS_ACCOUNT_ID,ECR_REPOSITORY,ECR_IMAGE_TAG
-          script: |
-            IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${ECR_IMAGE_TAG}"
-            docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_REGION}) ${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-            docker pull "${IMAGE_URI}"
+      # 5. Build and push worker Docker image
+      - name: Build and push worker Docker image
+        run: |
+          WORKER_IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_WORKER_REPOSITORY}:${ECR_WORKER_IMAGE_TAG}"
+          docker build -f worker/Dockerfile -t "${WORKER_IMAGE_URI}" worker
+          docker push "${WORKER_IMAGE_URI}"
 
-            docker stop ouat-api || true
-            docker rm ouat-api || true
+      # 6. Deploy on EC2 via SSM Run Command
+      - name: Deploy Docker container on EC2 (SSM)
+        run: |
+          IMAGE_URI="${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_API_REPOSITORY}:${ECR_IMAGE_TAG}"
+          COMMAND_ID=$(aws ssm send-command \
+            --region "${AWS_REGION}" \
+            --instance-ids "${{ secrets.SSM_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="sudo docker login -u AWS -p \$(aws ecr get-login-password --region ${AWS_REGION}) ${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com","sudo docker pull ${IMAGE_URI}","sudo docker stop ouat-api || true","sudo docker rm ouat-api || true","sudo docker run -d --name ouat-api --restart unless-stopped --env-file /home/ubuntu/backend/.env -p 8080:8080 ${IMAGE_URI}" \
+            --query "Command.CommandId" \
+            --output text)
 
-            docker run -d \
-              --name ouat-api \
-              --restart unless-stopped \
-              --env-file /home/ubuntu/backend/.env \
-              -p 8080:8080 \
-              "${IMAGE_URI}"
+          aws ssm wait command-executed \
+            --region "${AWS_REGION}" \
+            --command-id "${COMMAND_ID}" \
+            --instance-id "${{ secrets.SSM_INSTANCE_ID }}"
+
+          aws ssm get-command-invocation \
+            --region "${AWS_REGION}" \
+            --command-id "${COMMAND_ID}" \
+            --instance-id "${{ secrets.SSM_INSTANCE_ID }}" \
+            --query "Status,StandardOutputContent,StandardErrorContent" \
+            --output text
