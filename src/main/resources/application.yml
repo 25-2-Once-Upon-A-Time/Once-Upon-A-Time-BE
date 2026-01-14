@@ -21,16 +21,22 @@ spring:
 jwt:
   secret: ${JWT_SECRET_KEY}
 
-# Supabase 설정
-supabase:
-  url: ${SUPABASE_URL}
-  service-key: ${SUPABASE_SERVICE_KEY}
-  buckets:
-    image: ${SUPABASE_IMAGE_BUCKET}
-    audio: ${SUPABASE_AUDIO_BUCKET}
-    character: ${SUPABASE_CHARACTER_BUCKET}
-
 # 카카오 설정
 kakao:
   client-id: ${KAKAO_CLIENT_ID}
   redirect-uri: ${KAKAO_REDIRECT_URI}
+
+aws:
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    presign-ttl-seconds: ${AWS_S3_PRESIGN_TTL_SECONDS:900}
+  sqs:
+    queue-url: ${AWS_SQS_QUEUE_URL}
+  ec2:
+    enabled: ${AWS_EC2_SPOT_ENABLED:true}
+    launch-template-id: ${AWS_EC2_LAUNCH_TEMPLATE_ID:}
+    launch-template-version: ${AWS_EC2_LAUNCH_TEMPLATE_VERSION:$Latest}
+    spot-tag-name: ${AWS_EC2_SPOT_TAG_NAME:ouat-gpu-worker}
+    spot-tag-role: ${AWS_EC2_SPOT_TAG_ROLE:worker}
+    terminate-interval-ms: ${AWS_EC2_TERMINATE_INTERVAL_MS:300000}

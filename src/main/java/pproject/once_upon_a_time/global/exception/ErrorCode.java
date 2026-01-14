@@ -62,6 +62,7 @@ public enum ErrorCode {
     PLAYBACK_NOT_FOUND(404_007, HttpStatus.NOT_FOUND, "재생 정보를 찾을 수 없습니다."),
     AUDIOBOOK_STORY_NOT_FOUND(404_008, HttpStatus.NOT_FOUND, "해당 오디오북에 연결된 동화를 찾을 수 없습니다."),
     AUDIOBOOK_CHARACTER_NOT_FOUND(404_009, HttpStatus.NOT_FOUND, "해당 오디오북에 연결된 캐릭터를 찾을 수 없습니다."),
+    JOB_NOT_FOUND(404_010, HttpStatus.NOT_FOUND, "작업을 찾을 수 없습니다."),
 
 
     // ========================
@@ -70,6 +71,8 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(409_001, HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     ALREADY_WITHDRAWN_USER(409_004, HttpStatus.CONFLICT, "이미 탈퇴한 회원입니다."),
     STORY_THUMBNAIL_NOT_ALLOWED(409_005, HttpStatus.CONFLICT, "썸네일을 생성할 수 없는 상태입니다."),
+    JOB_RESULT_NOT_READY(409_006, HttpStatus.CONFLICT, "작업 결과가 아직 준비되지 않았습니다."),
+    JOB_STATUS_NOT_ALLOWED(409_007, HttpStatus.CONFLICT, "작업 상태 전이가 허용되지 않았습니다."),
 
 
     // ========================
@@ -80,6 +83,7 @@ public enum ErrorCode {
     KAKAO_USER_INFO_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "카카오 사용자 정보를 가져오는 중 오류가 발생했습니다."),
     REDIS_CONNECTION_FAILED(500_003, HttpStatus.INTERNAL_SERVER_ERROR, "Redis 연결에 실패했습니다."),
     PYTHON_PROCESS_FAILED(500_004, HttpStatus.INTERNAL_SERVER_ERROR, "파이썬 프로세스 처리 중 오류가 발생했습니다."),
+    JOB_MESSAGE_SERIALIZATION_FAILED(500_005, HttpStatus.INTERNAL_SERVER_ERROR, "작업 메시지 직렬화에 실패했습니다."),
     SUPABASE_UPLOAD_FAILED(502_001, HttpStatus.BAD_GATEWAY, "파일 업로드 중 오류가 발생했습니다."),
     PYTHON_PROCESS_TIMEOUT(504_001, HttpStatus.GATEWAY_TIMEOUT, "파이썬 프로세스가 제한 시간 내 종료되지 않았습니다."),
 

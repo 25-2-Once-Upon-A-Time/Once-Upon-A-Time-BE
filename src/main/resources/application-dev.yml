@@ -26,10 +26,6 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
 
-ai:
-  python-path: ${AI_PYTHON_PATH}
-  script-path: ${AI_SCRIPT_PATH}
-
 python:
   image-path: content/image_mock.py
   audiobook-path: content/audio_mock.py
