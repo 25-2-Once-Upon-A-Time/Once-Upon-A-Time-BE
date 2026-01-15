@@ -54,7 +54,7 @@ jobs:
             --region "${AWS_REGION}" \
             --instance-ids "${{ secrets.SSM_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters commands="sudo docker login -u AWS -p \$(aws ecr get-login-password --region ${AWS_REGION}) ${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com","sudo docker pull ${IMAGE_URI}","sudo docker stop ouat-api || true","sudo docker rm ouat-api || true","sudo docker run -d --name ouat-api --restart unless-stopped --env-file /home/ubuntu/backend/.env -p 8080:8080 ${IMAGE_URI}" \
+            --parameters commands="sudo docker login -u AWS -p \$(aws ecr get-login-password --region ${AWS_REGION}) ${ECR_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com","sudo bash /home/ubuntu/backend/deploy/deploy-bluegreen.sh ${IMAGE_URI}" \
             --query "Command.CommandId" \
             --output text)
 
