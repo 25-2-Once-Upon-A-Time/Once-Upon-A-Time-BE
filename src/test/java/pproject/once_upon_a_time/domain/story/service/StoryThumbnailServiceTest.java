@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.member.domain.Member;
@@ -63,12 +64,14 @@ class StoryThumbnailServiceTest {
         Job job = Job.builder()
                 .type(JobType.ILLUSTRATION)
                 .status(JobStatus.PENDING)
+                .targetType(JobTargetType.STORY)
+                .targetId(1L)
                 .build();
         UUID jobId = UUID.randomUUID();
         java.lang.reflect.Field idField = Job.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(job, jobId);
-        given(jobService.createJob(eq(JobType.ILLUSTRATION), eq(null))).willReturn(job);
+        given(jobService.createJob(eq(JobType.ILLUSTRATION), eq(JobTargetType.STORY), eq(1L), eq(null))).willReturn(job);
 
         storyThumbnailService = buildService();
         Job result = storyThumbnailService.createThumbnailJob(1L, owner);

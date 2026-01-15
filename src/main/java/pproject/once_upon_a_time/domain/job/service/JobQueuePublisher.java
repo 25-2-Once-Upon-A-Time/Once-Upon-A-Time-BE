@@ -26,6 +26,8 @@ public class JobQueuePublisher {
         JobQueueMessageDto message = JobQueueMessageDto.builder()
             .jobId(job.getId())
             .jobType(job.getType())
+            .targetType(job.getTargetType())
+            .targetId(job.getTargetId())
             .inputKey(job.getInputKey())
             .build();
         String payload = toJson(message);

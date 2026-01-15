@@ -10,6 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.member.repository.MemberRepository;
@@ -61,13 +62,14 @@ class JobControllerTest {
     @Test
     void createJob_returnsCreated() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.PENDING, "jobs/input.json", null, null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.PENDING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
-        when(jobService.createJobAndPublish(eq(JobType.STORY), eq("jobs/input.json"))).thenReturn(job);
+        when(jobService.createJobAndPublish(eq(JobType.STORY), eq(JobTargetType.STORY), eq(1L), eq("jobs/input.json")))
+            .thenReturn(job);
 
         mockMvc.perform(post("/api/v1/jobs")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"type\":\"STORY\",\"inputKey\":\"jobs/input.json\"}"))
+                .content("{\"type\":\"STORY\",\"targetType\":\"STORY\",\"targetId\":1,\"inputKey\":\"jobs/input.json\"}"))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.data.id").value(jobId.toString()))
@@ -90,7 +92,7 @@ class JobControllerTest {
     @Test
     void getJob_returnsJob() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.PENDING, "jobs/input.json", null, null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.PENDING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
         when(jobService.getJob(jobId)).thenReturn(job);
 
@@ -104,7 +106,7 @@ class JobControllerTest {
     @Test
     void getJobResult_notReady_returnsConflict() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, "jobs/input.json", null, null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
         when(jobService.getJob(jobId)).thenReturn(job);
 
@@ -116,7 +118,7 @@ class JobControllerTest {
     @Test
     void getJobResult_returnsPresignedUrl() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.SUCCEEDED, "jobs/input.json", "jobs/1/result.json", null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.SUCCEEDED, JobTargetType.STORY, 1L, "jobs/input.json", "jobs/1/result.json", null);
 
         when(jobService.getJob(jobId)).thenReturn(job);
         when(s3StorageService.createPresignedGetUrl("jobs/1/result.json")).thenReturn("https://example.com/result");
@@ -128,11 +130,22 @@ class JobControllerTest {
             .andExpect(jsonPath("$.data.presignedUrl").value("https://example.com/result"));
     }
 
-    private Job buildJob(UUID jobId, JobType type, JobStatus status, String inputKey, String outputKey, String errorMessage)
+    private Job buildJob(
+        UUID jobId,
+        JobType type,
+        JobStatus status,
+        JobTargetType targetType,
+        Long targetId,
+        String inputKey,
+        String outputKey,
+        String errorMessage
+    )
         throws Exception {
         Job job = Job.builder()
             .type(type)
             .status(status)
+            .targetType(targetType)
+            .targetId(targetId)
             .inputKey(inputKey)
             .outputKey(outputKey)
             .errorMessage(errorMessage)

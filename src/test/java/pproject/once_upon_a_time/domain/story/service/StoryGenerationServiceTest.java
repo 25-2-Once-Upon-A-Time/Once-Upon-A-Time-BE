@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.member.domain.Member;
@@ -62,10 +63,12 @@ class StoryGenerationServiceTest {
         Job job = Job.builder()
                 .type(JobType.STORY)
                 .status(JobStatus.PENDING)
+                .targetType(JobTargetType.STORY)
+                .targetId(1L)
                 .build();
         UUID jobId = UUID.randomUUID();
         ReflectionTestUtils.setField(job, "id", jobId);
-        given(jobService.createJob(eq(JobType.STORY), eq(null))).willReturn(job);
+        given(jobService.createJob(eq(JobType.STORY), eq(JobTargetType.STORY), eq(1L), eq(null))).willReturn(job);
 
         StoryGenerationService service = buildService();
         Job result = service.createStoryJob(request, member);

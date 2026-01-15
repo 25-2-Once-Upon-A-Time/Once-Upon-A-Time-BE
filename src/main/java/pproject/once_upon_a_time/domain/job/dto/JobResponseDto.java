@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 
 import java.util.UUID;
@@ -14,6 +15,8 @@ public class JobResponseDto {
     private UUID id;
     private JobType type;
     private JobStatus status;
+    private JobTargetType targetType;
+    private Long targetId;
     private String inputKey;
     private String outputKey;
     private String errorMessage;
@@ -23,6 +26,8 @@ public class JobResponseDto {
             .id(job.getId())
             .type(job.getType())
             .status(job.getStatus())
+            .targetType(job.getTargetType())
+            .targetId(job.getTargetId())
             .inputKey(job.getInputKey())
             .outputKey(job.getOutputKey())
             .errorMessage(job.getErrorMessage())

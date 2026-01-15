@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pproject.once_upon_a_time.domain.job.domain.Job;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.member.domain.Member;
@@ -28,7 +29,7 @@ public class StoryGenerationService {
         Member authenticatedMember = requireAuthenticatedMember(member);
         Story story = storyUpdateService.initiateStory(request, authenticatedMember);
 
-        Job job = jobService.createJob(JobType.STORY, null);
+        Job job = jobService.createJob(JobType.STORY, JobTargetType.STORY, story.getId(), null);
         String inputKey = buildInputKey(job);
         String inputJson = buildStoryInput(request, story);
         s3StorageService.uploadJson(inputKey, inputJson);

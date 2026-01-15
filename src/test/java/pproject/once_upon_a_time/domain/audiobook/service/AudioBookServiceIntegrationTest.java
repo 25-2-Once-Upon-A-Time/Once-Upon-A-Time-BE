@@ -10,6 +10,7 @@ import pproject.once_upon_a_time.domain.character.domain.Character;
 import pproject.once_upon_a_time.domain.character.repository.CharacterRepository;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.member.domain.Member;
@@ -89,13 +90,16 @@ class AudioBookServiceIntegrationTest {
         Job job = Job.builder()
                 .type(JobType.AUDIOBOOK)
                 .status(JobStatus.PENDING)
+                .targetType(JobTargetType.STORY)
+                .targetId(story.getId())
                 .build();
         UUID jobId = UUID.randomUUID();
         java.lang.reflect.Field idField = Job.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(job, jobId);
 
-        when(jobService.createJob(eq(JobType.AUDIOBOOK), eq(null))).thenReturn(job);
+        when(jobService.createJob(eq(JobType.AUDIOBOOK), eq(JobTargetType.STORY), eq(story.getId()), eq(null)))
+            .thenReturn(job);
 
         Job result = audioBookService.createAudioBookJob(story.getId(), character.getId(), member);
 

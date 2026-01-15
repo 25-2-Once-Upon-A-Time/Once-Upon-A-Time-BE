@@ -33,7 +33,12 @@ public class JobController {
     public ResponseEntity<ApiResult<JobResponseDto>> createJob(
         @RequestBody @Valid JobCreateRequestDto request
     ) {
-        Job job = jobService.createJobAndPublish(request.getType(), request.getInputKey());
+        Job job = jobService.createJobAndPublish(
+            request.getType(),
+            request.getTargetType(),
+            request.getTargetId(),
+            request.getInputKey()
+        );
         ApiResult<JobResponseDto> body = ApiResult.created(JobResponseDto.from(job));
         return ResponseEntity.status(body.httpStatus()).body(body);
     }
