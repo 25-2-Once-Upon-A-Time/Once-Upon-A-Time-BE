@@ -36,7 +36,7 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/api/v1/auth/**", // 여기에 reissue 포함됨
-                   "/api/v1/internal/jobs/**" // 내부 워커용 job API
+                    "/api/v1/internal/jobs/**" // 내부 워커용 job API
                 ).permitAll()
                 .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

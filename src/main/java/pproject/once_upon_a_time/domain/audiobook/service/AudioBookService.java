@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pproject.once_upon_a_time.domain.audiobook.dto.AudioBookResponseDto;
 import pproject.once_upon_a_time.domain.job.domain.Job;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.character.domain.Character;
@@ -59,7 +60,7 @@ public class AudioBookService {
             throw new CustomException(ErrorCode.INVALID_INPUT, "해당 스토리에 스크립트가 없습니다.");
         }
 
-        Job job = jobService.createJob(JobType.AUDIOBOOK, null);
+        Job job = jobService.createJob(JobType.AUDIOBOOK, JobTargetType.STORY, story.getId(), null);
         String inputKey = buildInputKey(job);
         String inputJson = buildAudioBookInput(story, character, scripts);
         s3StorageService.uploadJson(inputKey, inputJson);
@@ -85,6 +86,8 @@ public class AudioBookService {
     private String buildAudioBookInput(Story story, Character character, List<Script> scripts) {
         try {
             var root = objectMapper.createObjectNode();
+            root.put("story_id", story.getId());
+            root.put("character_id", character.getId());
             root.put("title", Objects.toString(story.getTitle(), "Untitled"));
             root.put("character_name", Objects.toString(character.getCharacterName(), "UNKNOWN"));
 

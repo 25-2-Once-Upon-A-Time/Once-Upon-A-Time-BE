@@ -10,6 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 import pproject.once_upon_a_time.domain.job.service.JobService;
 import pproject.once_upon_a_time.domain.job.service.WorkerAuthService;
@@ -52,7 +53,7 @@ class WorkerJobControllerTest {
     @Test
     void markRunning_statusConflict_returnsConflict() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.SUCCEEDED, "jobs/input.json", null, null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.SUCCEEDED, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
         doNothing().when(workerAuthService).validate("token");
         when(jobService.getJob(jobId)).thenReturn(job);
@@ -67,8 +68,8 @@ class WorkerJobControllerTest {
     @Test
     void markRunning_success_returnsJob() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job before = buildJob(jobId, JobType.STORY, JobStatus.PENDING, "jobs/input.json", null, null);
-        Job after = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, "jobs/input.json", null, null);
+        Job before = buildJob(jobId, JobType.STORY, JobStatus.PENDING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
+        Job after = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
         doNothing().when(workerAuthService).validate("token");
         when(jobService.getJob(jobId)).thenReturn(before, after);
@@ -100,7 +101,7 @@ class WorkerJobControllerTest {
     @Test
     void markSucceeded_statusConflict_returnsConflict() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, "jobs/input.json", null, null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
         doNothing().when(workerAuthService).validate("token");
         when(jobService.getJob(jobId)).thenReturn(job);
@@ -117,8 +118,8 @@ class WorkerJobControllerTest {
     @Test
     void markSucceeded_success_returnsJob() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job before = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, "jobs/input.json", null, null);
-        Job after = buildJob(jobId, JobType.STORY, JobStatus.SUCCEEDED, "jobs/input.json", "jobs/result.json", null);
+        Job before = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
+        Job after = buildJob(jobId, JobType.STORY, JobStatus.SUCCEEDED, JobTargetType.STORY, 1L, "jobs/input.json", "jobs/result.json", null);
 
         doNothing().when(workerAuthService).validate("token");
         when(jobService.getJob(jobId)).thenReturn(before, after);
@@ -151,7 +152,7 @@ class WorkerJobControllerTest {
     @Test
     void markFailed_statusConflict_returnsConflict() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job job = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, "jobs/input.json", null, null);
+        Job job = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
 
         doNothing().when(workerAuthService).validate("token");
         when(jobService.getJob(jobId)).thenReturn(job);
@@ -168,8 +169,8 @@ class WorkerJobControllerTest {
     @Test
     void markFailed_success_returnsJob() throws Exception {
         UUID jobId = UUID.randomUUID();
-        Job before = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, "jobs/input.json", null, null);
-        Job after = buildJob(jobId, JobType.STORY, JobStatus.FAILED, "jobs/input.json", null, "boom");
+        Job before = buildJob(jobId, JobType.STORY, JobStatus.RUNNING, JobTargetType.STORY, 1L, "jobs/input.json", null, null);
+        Job after = buildJob(jobId, JobType.STORY, JobStatus.FAILED, JobTargetType.STORY, 1L, "jobs/input.json", null, "boom");
 
         doNothing().when(workerAuthService).validate("token");
         when(jobService.getJob(jobId)).thenReturn(before, after);
@@ -185,11 +186,22 @@ class WorkerJobControllerTest {
             .andExpect(jsonPath("$.data.errorMessage").value("boom"));
     }
 
-    private Job buildJob(UUID jobId, JobType type, JobStatus status, String inputKey, String outputKey, String errorMessage)
+    private Job buildJob(
+        UUID jobId,
+        JobType type,
+        JobStatus status,
+        JobTargetType targetType,
+        Long targetId,
+        String inputKey,
+        String outputKey,
+        String errorMessage
+    )
         throws Exception {
         Job job = Job.builder()
             .type(type)
             .status(status)
+            .targetType(targetType)
+            .targetId(targetId)
             .inputKey(inputKey)
             .outputKey(outputKey)
             .errorMessage(errorMessage)

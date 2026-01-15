@@ -35,6 +35,13 @@ public class Job extends BaseTimeEntity {
     @Column(nullable = false, length = 30)
     private JobStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_type", nullable = false, length = 30)
+    private JobTargetType targetType;
+
+    @Column(name = "target_id")
+    private Long targetId;
+
     @Column(name = "input_key", length = 500)
     private String inputKey;
 
@@ -45,9 +52,19 @@ public class Job extends BaseTimeEntity {
     private String errorMessage;
 
     @Builder
-    public Job(JobType type, JobStatus status, String inputKey, String outputKey, String errorMessage) {
+    public Job(
+        JobType type,
+        JobStatus status,
+        JobTargetType targetType,
+        Long targetId,
+        String inputKey,
+        String outputKey,
+        String errorMessage
+    ) {
         this.type = type;
         this.status = status;
+        this.targetType = targetType;
+        this.targetId = targetId;
         this.inputKey = inputKey;
         this.outputKey = outputKey;
         this.errorMessage = errorMessage;

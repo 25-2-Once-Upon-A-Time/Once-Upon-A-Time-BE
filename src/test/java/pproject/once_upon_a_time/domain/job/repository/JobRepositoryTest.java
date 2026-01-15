@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.transaction.annotation.Transactional;
 import pproject.once_upon_a_time.domain.job.domain.Job;
 import pproject.once_upon_a_time.domain.job.domain.JobStatus;
+import pproject.once_upon_a_time.domain.job.domain.JobTargetType;
 import pproject.once_upon_a_time.domain.job.domain.JobType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +23,8 @@ class JobRepositoryTest {
         Job job = jobRepository.save(Job.builder()
             .type(JobType.STORY)
             .status(JobStatus.PENDING)
+            .targetType(JobTargetType.STORY)
+            .targetId(1L)
             .build());
 
         int first = jobRepository.updateStatusIfMatches(job.getId(), JobStatus.PENDING, JobStatus.RUNNING);
@@ -40,6 +43,8 @@ class JobRepositoryTest {
         Job job = jobRepository.save(Job.builder()
             .type(JobType.AUDIOBOOK)
             .status(JobStatus.PENDING)
+            .targetType(JobTargetType.STORY)
+            .targetId(1L)
             .build());
 
         int notRunning = jobRepository.markFailed(job.getId(), JobStatus.RUNNING, JobStatus.FAILED, "error");
@@ -60,6 +65,8 @@ class JobRepositoryTest {
         Job job = jobRepository.save(Job.builder()
             .type(JobType.ILLUSTRATION)
             .status(JobStatus.PENDING)
+            .targetType(JobTargetType.STORY)
+            .targetId(1L)
             .errorMessage("old")
             .build());
 
